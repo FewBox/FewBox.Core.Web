@@ -1,0 +1,13 @@
+language: csharp
+mono: none
+dotnet: 2.1.300
+env:
+  - PROJECTNAME=FewBox.Core.Web PROJECTUNITTESTNAME=$PROJECTNAME.UnitTest
+install:
+  - dotnet restore $TRAVIS_BUILD_DIR/$PROJECTNAME/$PROJECTNAME.csproj
+  - dotnet restore $TRAVIS_BUILD_DIR/$PROJECTUNITTESTNAME/$PROJECTUNITTESTNAME.csproj
+script:
+  - dotnet test $TRAVIS_BUILD_DIR/$PROJECTUNITTESTNAME/$PROJECTUNITTESTNAME.csproj # q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]
+  - dotnet pack -c Release $TRAVIS_BUILD_DIR/$PROJECTNAME/$PROJECTNAME.csproj
+after_success:
+  - dotnet nuget push $TRAVIS_BUILD_DIR/$PROJECTNAME/bin/Release/$PROJECTNAME.*.nupkg -k $NUGET_KEY -s https://api.nuget.org/v3/index.json
