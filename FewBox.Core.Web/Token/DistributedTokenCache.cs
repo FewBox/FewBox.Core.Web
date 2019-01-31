@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Linq;
+using System.Security.Claims;
 
 namespace FewBox.Core.Web.Token
 {
@@ -24,9 +25,9 @@ namespace FewBox.Core.Web.Token
             var userProfile = new UserProfile{
                 Issuer = userInfo.Issuer,
                 Id = userInfo.Id.ToString(),
-                DisplayName = userInfo.Claims.FirstOrDefault(c => c.Type == "DisplayName").Value,
-                Title = userInfo.Claims.FirstOrDefault(c => c.Type == "Title").Value,
-                Department = userInfo.Claims.FirstOrDefault(c => c.Type == "Department").Value
+                Name = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value,
+                Email = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
+                Roles = userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList()
             };
             this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile), distributedCacheEntryOptions);
             return token;

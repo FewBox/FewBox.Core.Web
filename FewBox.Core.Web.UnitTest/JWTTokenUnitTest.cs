@@ -21,8 +21,13 @@ namespace FewBox.Core.Core.UnitTest
                 Id = userId.ToString(),
                 Key = "EnVsakc0bNXs1UYHAiOjE1ND",
                 Issuer = "https://fewbox.com",
-                Claims = new List<Claim>{ new Claim("DisplayName", "landpy", "DisplayName" ) }
-                };
+                Claims = new List<Claim>{
+                    new Claim(ClaimTypes.Name, "landpy" ),
+                    new Claim(ClaimTypes.Email, "dev@fewbox.com"),
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim(ClaimTypes.Role, "Normal")
+                }
+            };
         }
 
         [TestMethod]
@@ -30,7 +35,9 @@ namespace FewBox.Core.Core.UnitTest
         {
             string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromMinutes(5));
             Assert.AreEqual(this.UserInfo.Id, this.TokenService.GetUserIdByToken(token));
-            //Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).DisplayName);
+            Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
+            Assert.AreEqual("dev@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
+            Assert.AreEqual(2, this.TokenService.GetUserProfileByToken(token).Roles.Count);
         }
     }
 }

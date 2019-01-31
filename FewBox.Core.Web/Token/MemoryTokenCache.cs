@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Linq;
+using System.Security.Claims;
 
 namespace FewBox.Core.Web.Token
 {
@@ -19,9 +20,9 @@ namespace FewBox.Core.Web.Token
             var userProfile = new UserProfile{
                 Issuer = userInfo.Issuer,
                 Id = userInfo.Id!=null ? userInfo.Id.ToString() : String.Empty,
-                DisplayName = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == "DisplayName").Value : String.Empty,
-                Title = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == "Title").Value : String.Empty,
-                Department = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == "Department").Value : String.Empty
+                Name = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value : String.Empty,
+                Email = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value : String.Empty,
+                Roles = userInfo.Claims!=null ? userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList() : null
             };
             this.MemoryCache.Set<UserProfile>(token, userProfile, expiredTime);
             return token;
