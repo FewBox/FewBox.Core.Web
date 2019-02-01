@@ -17,9 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.25" />
-    <PackageReference Include="FewBox.Core.Utility" Version="1.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.24" />
+    <PackageReference Include="FewBox.Core.Utility" Version="1.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.0" />
