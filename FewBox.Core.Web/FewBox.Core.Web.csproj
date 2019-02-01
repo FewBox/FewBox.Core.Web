@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Copyright>FewBox (c) 2019</Copyright>
     <PackageLicenseUrl>https://raw.githubusercontent.com/FewBox/FewBox.Core.Web/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://fewbox.com</PackageProjectUrl>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.23" />
+    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.25" />
     <PackageReference Include="FewBox.Core.Utility" Version="1.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
