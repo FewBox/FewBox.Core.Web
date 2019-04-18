@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FewBox.App.Demo.Configs;
+using FewBox.Core.Web.Security;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -16,6 +18,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using FewBox.App.Demo.Mock;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace FewBox.App.Demo
 {
@@ -35,6 +39,11 @@ namespace FewBox.App.Demo
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
             services.AddScoped<ITokenService, JWTToken>();
+            services.AddSingleton<IAuthorizationHandler, RemoteRoleHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, RemoteRoleAuthorizationPolicyProvider>();
+            services.AddSingleton<IRemoteRoleService, MockRemoteRoleService>();
+            services.AddHttpContextAccessor(); // IHttpContextAccessor
+            //services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {

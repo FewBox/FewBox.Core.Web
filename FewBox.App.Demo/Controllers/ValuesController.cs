@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FewBox.Core.Web.Security;
 
 namespace FewBox.App.Demo.Controllers
 {
     // Header: Authorization, Bearer [JWT]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ValuesController : ControllerBase
     {
         private IList<Value> Values { get; set; }
@@ -21,6 +21,13 @@ namespace FewBox.App.Demo.Controllers
                 new Value { Id = 1, Content = "Value1" },
                 new Value { Id = 2, Content = "Value2" }
             };
+        }
+
+        [HttpGet("remoterole")]
+        [RemoteRoleAuthorize(Policy="RemoteRole_Form")]
+        public IList<Value> GetByRemoteRole()
+        {
+            return this.Values;
         }
 
         // GET api/values

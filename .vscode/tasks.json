@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FewBox.Core.Web.UnitTest/FewBox.Core.Web.UnitTest.csproj"
+                "${workspaceFolder}/FewBox.App.Demo/FewBox.App.Demo.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
