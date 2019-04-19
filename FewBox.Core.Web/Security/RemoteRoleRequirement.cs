@@ -4,10 +4,10 @@ namespace FewBox.Core.Web.Security
 {
     public class RemoteRoleRequirement : IAuthorizationRequirement
     {
-        public RemoteType RemoteType { get; set; }
-        public RemoteRoleRequirement(RemoteType remoteType)
+        public RemoteProcedureCallType RemoteProcedureCallType { get; set; }
+        public RemoteRoleRequirement(RemoteProcedureCallType remoteProcedureCallType)
         {
-            this.RemoteType = remoteType;
+            this.RemoteProcedureCallType = remoteProcedureCallType;
         }
     }
 }

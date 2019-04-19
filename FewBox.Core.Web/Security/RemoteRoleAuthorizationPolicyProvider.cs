@@ -15,10 +15,10 @@ namespace FewBox.Core.Web.Security
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
             if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase)&&
-            Enum.TryParse<RemoteType>(policyName.Substring(POLICY_PREFIX.Length), out RemoteType remoteType))
+            Enum.TryParse<RemoteProcedureCallType>(policyName.Substring(POLICY_PREFIX.Length), out RemoteProcedureCallType remoteProcedureCallType))
             {
                 var policy = new AuthorizationPolicyBuilder();
-                policy.AddRequirements(new RemoteRoleRequirement(remoteType));
+                policy.AddRequirements(new RemoteRoleRequirement(remoteProcedureCallType));
                 return Task.FromResult(policy.Build());
             }
 
