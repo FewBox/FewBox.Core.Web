@@ -7,12 +7,12 @@ namespace FewBox.Core.Web.Security
 {
     public class RemoteRoleHandler : AuthorizationHandler<RemoteRoleRequirement>
     {
-        private IRemoteRoleService RemoteRoleService { get; set; }
+        private IRemoteAuthenticationService RemoteAuthenticationService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
         
-        public RemoteRoleHandler(IRemoteRoleService remoteRoleService, IActionContextAccessor actionContextAccessor)
+        public RemoteRoleHandler(IRemoteAuthenticationService remoteAuthenticationService, IActionContextAccessor actionContextAccessor)
         {
-            this.RemoteRoleService = remoteRoleService;
+            this.RemoteAuthenticationService = remoteAuthenticationService;
             this.ActionContextAccessor = actionContextAccessor;
         }
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RemoteRoleRequirement requirement)
@@ -22,11 +22,11 @@ namespace FewBox.Core.Web.Security
             IList<string> roles;
             if(requirement.RemoteProcedureCallType == RemoteProcedureCallType.WithHeader)
             {
-                roles = this.RemoteRoleService.FindRolesByControllerAndAction(controller, action, this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers);
+                roles = this.RemoteAuthenticationService.FindRolesByControllerAndAction(controller, action, this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers);
             }
             else
             {
-                roles = this.RemoteRoleService.FindRolesByControllerAndAction(controller, action);
+                roles = this.RemoteAuthenticationService.FindRolesByControllerAndAction(controller, action);
             }
             foreach(string role in roles)
             {

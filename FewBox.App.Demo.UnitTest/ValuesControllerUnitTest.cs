@@ -1,12 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FewBox.App.Demo.Controllers;
 using FewBox.Core.Web.Token;
-using FewBox.App.Demo.Configs;
-using System.Linq;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
+using FewBox.Core.Web.Config;
 
 namespace FewBox.App.Demo.UnitTest
 {
@@ -15,6 +11,7 @@ namespace FewBox.App.Demo.UnitTest
     {
         private ITokenService AdminTokenService { get; set; }
         private ITokenService NormalTokenService { get; set; }
+        private JWTConfig JWTConfig { get; set; }
 
         [TestInitialize]
         public void Init()
@@ -25,11 +22,16 @@ namespace FewBox.App.Demo.UnitTest
             this.NormalTokenService = Moq.Mock.Of<ITokenService>(l=>l.GenerateToken(
                 It.IsAny<UserInfo>(),
                 It.IsAny<TimeSpan>())=="");
+            this.JWTConfig = new JWTConfig{
+                Key = "EnVsakc0bNXs1UYHAiOjE1ND",
+                Issuer = "https://fewbox.com"
+            };
         }
 
         [TestMethod]
         public void TestMethod1()
         {
+            //var tokenController = new AuthenticationController(this.AdminTokenService, this.JWTConfig);
         }
     }
 }
