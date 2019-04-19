@@ -42,8 +42,8 @@ namespace FewBox.App.Demo
             services.AddSingleton<IAuthorizationHandler, RemoteRoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RemoteRoleAuthorizationPolicyProvider>();
             services.AddSingleton<IRemoteRoleService, MockRemoteRoleService>();
-            services.AddHttpContextAccessor(); // IHttpContextAccessor
-            //services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {

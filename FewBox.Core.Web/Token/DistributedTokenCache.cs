@@ -6,22 +6,18 @@ using System.Security.Claims;
 
 namespace FewBox.Core.Web.Token
 {
-    public class DistributedTokenCache : ITokenService
+    public class DistributedTokenCache : TokenService
     {
         private IDistributedCache DistributedCache { get; set; }
 
-        public DistributedTokenCache(IDistributedCache distributedCache)
+        public DistributedTokenCache(IDistributedCache distributedCache) : base()
         {
             this.DistributedCache = distributedCache;
         }
 
-        public string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
+        public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
         {
             string token = Guid.NewGuid().ToString();
-            DistributedCacheEntryOptions distributedCacheEntryOptions = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = expiredTime
-            };
             var userProfile = new UserProfile{
                 Issuer = userInfo.Issuer,
                 Id = userInfo.Id.ToString(),
@@ -29,20 +25,42 @@ namespace FewBox.Core.Web.Token
                 Email = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
                 Roles = userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList()
             };
-            this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile), distributedCacheEntryOptions);
+            if(expiredTime == TimeSpan.Zero)
+            {
+                this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile));
+            }
+            else
+            {
+                DistributedCacheEntryOptions distributedCacheEntryOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = expiredTime
+                };
+                this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile), distributedCacheEntryOptions);
+            }
             return token;
         }
 
-        public string GetUserIdByToken(string token)
+        public override string GetUserIdByToken(string token)
         {
-            string userProfileString = this.DistributedCache.GetString(token.ToString());
-            return JsonUtility.Deserialize<UserProfile>(userProfileString).Id;
+            string userId = null;
+            var userProfile = this.GetUserProfileByToken(token);
+            if(userProfile!=null)
+            {
+                userId = userProfile.Id;
+            }
+            return userId;
         }
 
-        public UserProfile GetUserProfileByToken(string token)
+        public override UserProfile GetUserProfileByToken(string token)
         {
             string userProfileString = this.DistributedCache.GetString(token.ToString());
             return JsonUtility.Deserialize<UserProfile>(userProfileString);
+        }
+
+        public override bool ValidateToken(string token, string key, string issuer)
+        {
+            string userProfileString = this.DistributedCache.GetString(token.ToString());
+            return !String.IsNullOrEmpty(userProfileString);
         }
     }
 }

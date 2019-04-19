@@ -24,7 +24,7 @@ namespace FewBox.App.Demo.Controllers
         }
 
         [HttpGet("remoterole")]
-        [RemoteRoleAuthorize(Policy="RemoteRole_Form")]
+        [RemoteRoleAuthorize(Policy="RemoteRole_WithHeader")]
         public IList<Value> GetByRemoteRole()
         {
             return this.Values;

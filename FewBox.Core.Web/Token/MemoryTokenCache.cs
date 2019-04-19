@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace FewBox.Core.Web.Token
 {
-    public class MemoryTokenCache : ITokenService
+    public class MemoryTokenCache : TokenService
     {
         private IMemoryCache MemoryCache { get; set; }
 
@@ -14,7 +14,7 @@ namespace FewBox.Core.Web.Token
             this.MemoryCache = memoryCache;
         }
 
-        public string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
+        public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
         {
             string token = Guid.NewGuid().ToString();
             var userProfile = new UserProfile{
@@ -24,18 +24,37 @@ namespace FewBox.Core.Web.Token
                 Email = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value : String.Empty,
                 Roles = userInfo.Claims!=null ? userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList() : null
             };
-            this.MemoryCache.Set<UserProfile>(token, userProfile, expiredTime);
+            if(expiredTime == TimeSpan.Zero)
+            {
+                this.MemoryCache.Set<UserProfile>(token, userProfile);
+            }
+            else
+            {
+                this.MemoryCache.Set<UserProfile>(token, userProfile, expiredTime);
+            }
             return token;
         }
 
-        public string GetUserIdByToken(string token)
+        public override string GetUserIdByToken(string token)
         {
-            return this.MemoryCache.Get<UserProfile>(token).Id;
+            string userId = null;
+            var userProfile = this.GetUserProfileByToken(token);
+            if(userProfile!=null)
+            {
+                userId = userProfile.Id;
+            }
+            return userId;
         }
 
-        public UserProfile GetUserProfileByToken(string token)
+        public override UserProfile GetUserProfileByToken(string token)
         {
             return this.MemoryCache.Get<UserProfile>(token);
+        }
+
+        public override bool ValidateToken(string token, string key, string issuer)
+        {
+            var userProfile = this.MemoryCache.Get<UserProfile>(token);
+            return userProfile != null;
         }
     }
 }
