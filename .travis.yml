@@ -4,12 +4,15 @@ sudo: required
 dist: xenial
 dotnet: 2.2
 env:
-  - PROJECTNAME=FewBox.Core.Web PROJECTUNITTESTNAME=$PROJECTNAME.UnitTest
+  - PROJECTNAME=FewBox.Core.Web PROJECTUNITTESTNAME=$PROJECTNAME.UnitTest APP_PROJECTNAME=FewBox.App.Demo APP_PROJECTUNITTESTNAME=$PROJECTNAME.UnitTest
 install:
   - dotnet restore $TRAVIS_BUILD_DIR/$PROJECTNAME/$PROJECTNAME.csproj
   - dotnet restore $TRAVIS_BUILD_DIR/$PROJECTUNITTESTNAME/$PROJECTUNITTESTNAME.csproj
+  - dotnet restore $TRAVIS_BUILD_DIR/$APP_PROJECTNAME/$APP_PROJECTNAME.csproj
+  - dotnet restore $TRAVIS_BUILD_DIR/$APP_PROJECTUNITTESTNAME/$APP_PROJECTUNITTESTNAME.csproj
 script:
   - dotnet test $TRAVIS_BUILD_DIR/$PROJECTUNITTESTNAME/$PROJECTUNITTESTNAME.csproj # q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]
+  - dotnet test $TRAVIS_BUILD_DIR/$APP_PROJECTUNITTESTNAME/$APP_PROJECTUNITTESTNAME.csproj # q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]
   - dotnet pack -c Release $TRAVIS_BUILD_DIR/$PROJECTNAME/$PROJECTNAME.csproj
 after_success:
   - dotnet nuget push $TRAVIS_BUILD_DIR/$PROJECTNAME/bin/Release/$PROJECTNAME.*.nupkg -k $NUGET_KEY -s https://api.nuget.org/v3/index.json

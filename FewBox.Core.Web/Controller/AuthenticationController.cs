@@ -18,15 +18,12 @@ namespace FewBox.Core.Web.Controller
     {
         private ITokenService TokenService { get; set; }
         private IRemoteAuthenticationService RemoteAuthenticationService { get; set; }
-        private IHttpContextAccessor HttpContextAccessor{ get; set; }
         private JWTConfig JWTConfig { get; set; }
 
-        public AuthenticationController(ITokenService tokenService, IRemoteAuthenticationService remoteAuthenticationService,
-        IHttpContextAccessor httpContextAccessor, JWTConfig jWTConfig)
+        public AuthenticationController(ITokenService tokenService, IRemoteAuthenticationService remoteAuthenticationService, JWTConfig jWTConfig)
         {
             this.TokenService = tokenService;
             this.RemoteAuthenticationService = remoteAuthenticationService;
-            this.HttpContextAccessor = httpContextAccessor;
             this.JWTConfig = jWTConfig;
         }
 
@@ -59,12 +56,11 @@ namespace FewBox.Core.Web.Controller
         [RemoteRoleAuthorize(Policy="RemoteRole_WithHeader")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
-            var claims = this.HttpContextAccessor.HttpContext.User.Claims;
             var userInfo = new UserInfo { 
                 Id = Guid.NewGuid().ToString(),
                 Key = this.JWTConfig.Key,
                 Issuer = this.JWTConfig.Issuer,
-                Claims = claims
+                Claims = this.HttpContext.User.Claims
             };
             string token = this.TokenService.GenerateToken(userInfo, renewTokenRequestDto.ExpiredTime);
             return new RenewTokenResponseDto { Token = token };
