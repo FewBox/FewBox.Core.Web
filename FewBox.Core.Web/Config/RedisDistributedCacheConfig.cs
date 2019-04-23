@@ -1,6 +1,6 @@
-namespace FewBox.Core.Web.Config
+﻿namespace FewBox.Core.Web.Config
 {
-    public class RedisDistributedCacheConfiguration
+    public class RedisDistributedCacheConfig
     {
         public string Configuration { get; set; }
         public string InstanceName { get; set; }

@@ -5,12 +5,9 @@ namespace FewBox.Core.Web.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    abstract class MapperController : ControllerBase
+    public abstract class MapperController : ControllerBase
     {
-        private IMapper Mapper { get; set; }
-
-        [FromHeader(Name = "Authorization")]
-        public string Authorization { get; set; }
+        protected IMapper Mapper { get; set; }
 
         protected MapperController(IMapper mapper)
         {
