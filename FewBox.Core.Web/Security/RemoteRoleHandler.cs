@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -20,14 +21,16 @@ namespace FewBox.Core.Web.Security
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
             IList<string> roles;
-            if(requirement.RemoteProcedureCallType == RemoteProcedureCallType.WithHeader)
+            if(requirement.RemoteProcedureCallType == RemoteProcedureCallType.WithLog)
             {
-                roles = this.RemoteAuthenticationService.FindRolesByControllerAndAction(controller, action, this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers);
+                Console.WriteLine($"Controller: {controller}");
+                Console.WriteLine($"Action: {action}");
+                foreach(var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
+                {
+                    Console.WriteLine($"Header: {header.Key} - {header.Value}");
+                }
             }
-            else
-            {
-                roles = this.RemoteAuthenticationService.FindRolesByControllerAndAction(controller, action);
-            }
+            roles = this.RemoteAuthenticationService.FindRolesByControllerAndAction(controller, action, this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers);
             foreach(string role in roles)
             {
                 if(context.User.IsInRole(role))

@@ -3,6 +3,6 @@
     public enum RemoteProcedureCallType
     {
         Pure,
-        WithHeader   
+        WithLog   
     }
 }

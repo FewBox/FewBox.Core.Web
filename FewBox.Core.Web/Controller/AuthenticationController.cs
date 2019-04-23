@@ -53,7 +53,7 @@ namespace FewBox.Core.Web.Controller
 
         [AllowAnonymous]
         [HttpPost("renewtoken")]
-        [RemoteRoleAuthorize(Policy="RemoteRole_WithHeader")]
+        [RemoteRoleAuthorize(Policy="RemoteRole_Pure")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
             var userInfo = new UserInfo { 
