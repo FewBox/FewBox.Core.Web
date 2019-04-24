@@ -32,7 +32,7 @@ namespace FewBox.Core.Web.Controller
         public SignInResponseDto SignIn([FromBody]SignInRequestDto signInRequestDto)
         {
             IList<string> roles;
-            if(this.RemoteAuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, out roles))
+            if(this.RemoteAuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out roles))
             {
                 var claims = from role in roles
                 select new Claim(ClaimTypes.Role, role);
