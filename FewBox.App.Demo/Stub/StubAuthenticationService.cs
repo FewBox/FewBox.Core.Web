@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace FewBox.App.Demo.Stub
 {
-    public class StubRemoteAuthenticationService : IRemoteAuthenticationService
+    public class StubAuthenticationService : IAuthenticationService
     {
         public IList<string> FindRolesByControllerAndAction(string controller, string action, IHeaderDictionary headers)
         {
@@ -12,7 +12,14 @@ namespace FewBox.App.Demo.Stub
         }
         public bool IsValid(string username, string password, string userType, out IList<string> roles)
         {
-            roles = new List<string> { };
+            if(username == "fewbox")
+            {
+                roles = new List<string> { "Admin" };
+            }
+            else
+            {
+                roles = new List<string> { "Normal" };
+            }
             return true;
         }
     }

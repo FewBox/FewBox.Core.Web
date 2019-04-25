@@ -16,14 +16,14 @@ namespace FewBox.App.Demo.UnitTest
     [TestClass]
     public class ValuesControllerUnitTest
     {
-        private IRemoteAuthenticationService RemoteAuthenticationService { get; set; }
+        private IAuthenticationService AuthenticationService { get; set; }
         private JWTConfig JWTConfig { get; set; }
 
         [TestInitialize]
         public void Init()
         {
             IList<string> roles = new List<string> { "Admin" };
-            this.RemoteAuthenticationService = Mock.Of<IRemoteAuthenticationService>(l=>
+            this.AuthenticationService = Mock.Of<IAuthenticationService>(l=>
                 l.FindRolesByControllerAndAction(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IHeaderDictionary>())==new List<string>{} &&
                 l.IsValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), out roles ) == true);
             this.JWTConfig = new JWTConfig{
@@ -36,9 +36,9 @@ namespace FewBox.App.Demo.UnitTest
         public void TestSignInAndValues()
         {
             var tokenService = new JWTToken();
-            var authenticationController = new AuthenticationController(tokenService, this.RemoteAuthenticationService, this.JWTConfig);
+            var authenticationController = new AuthenticationController(tokenService, this.AuthenticationService, this.JWTConfig);
             authenticationController.ControllerContext.HttpContext = new DefaultHttpContext();
-            var signInResponseDto = authenticationController.SignIn(new SignInRequestDto{ Username = "landpy", Password = "fewbox", ExpiredTime = TimeSpan.FromMinutes(5) });
+            var signInResponseDto = authenticationController.SignIn(new SignInRequestDto{ Username = "landpy", Password = "fewbox", ExpiredTimeSpan = "00:05:00" });
             Assert.IsTrue(signInResponseDto.IsSuccessful);
             Assert.IsTrue(signInResponseDto.IsValid);
             Assert.IsNotNull(signInResponseDto.Token);
@@ -49,7 +49,7 @@ namespace FewBox.App.Demo.UnitTest
                 new ClaimsIdentity(
                     new Claim[]{new Claim(ClaimTypes.Role, "Admin"), new Claim(TokenClaims.Id, userProfile.Id), new Claim(TokenClaims.Issuer, userProfile.Issuer)},
                 "JWT"));
-            var renewTokenResponseDto = authenticationController.RenewToken(new RenewTokenRequestDto { ExpiredTime = TimeSpan.FromMinutes(5) });
+            var renewTokenResponseDto = authenticationController.RenewToken(new RenewTokenRequestDto { ExpiredTimeSpan = "00:05:00" });
             Assert.IsTrue(renewTokenResponseDto.IsSuccessful);
             Assert.IsNotNull(renewTokenResponseDto.Token);
         }

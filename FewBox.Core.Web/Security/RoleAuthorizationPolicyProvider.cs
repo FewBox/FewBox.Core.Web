@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace FewBox.Core.Web.Security
 {
-    public class RemoteRoleAuthorizationPolicyProvider : IAuthorizationPolicyProvider
+    public class RoleAuthorizationPolicyProvider : IAuthorizationPolicyProvider
     {
-        const string POLICY_PREFIX = "RemoteRole_";
+        const string POLICY_PREFIX = "JWTRole_";
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
         {
             return Task.FromResult(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
@@ -15,13 +15,12 @@ namespace FewBox.Core.Web.Security
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
             if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase)&&
-            Enum.TryParse<RemoteProcedureCallType>(policyName.Substring(POLICY_PREFIX.Length), out RemoteProcedureCallType remoteProcedureCallType))
+            Enum.TryParse<RolePolicyType>(policyName.Substring(POLICY_PREFIX.Length), out RolePolicyType rolePolicyType))
             {
                 var policy = new AuthorizationPolicyBuilder();
-                policy.AddRequirements(new RemoteRoleRequirement(remoteProcedureCallType));
+                policy.AddRequirements(new RoleRequirement(rolePolicyType));
                 return Task.FromResult(policy.Build());
             }
-
             return Task.FromResult<AuthorizationPolicy>(null);
         }
     }

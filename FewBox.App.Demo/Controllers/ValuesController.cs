@@ -23,23 +23,30 @@ namespace FewBox.App.Demo.Controllers
             };
         }
 
-        [HttpGet("remoterole")]
-        [RemoteRoleAuthorize(Policy="RemoteRole_WithLog")]
-        public IList<Value> GetByRemoteRole()
+        [HttpGet("logheader")]
+        [Authorize(Policy="JWTRole_Header")]
+        public IList<Value> GetByWithHeader()
+        {
+            return this.Values;
+        }
+
+        [HttpGet("logcookie")]
+        [Authorize(Policy="JWTRole_Cookie")]
+        public IList<Value> GetByWithCookie()
         {
             return this.Values;
         }
 
         // GET api/values
         [HttpGet]
-        [Authorize(Roles = "Normal")]
+        [Authorize(Roles = "Normal, Admin")]
         public IList<Value> Get()
         {
             return this.Values;
         }
 
         // GET api/values/5
-        [Authorize(Roles = "Normal")]
+        [Authorize(Roles = "Normal, Admin")]
         [HttpGet("{id}")]
         public Value Get(int id)
         {

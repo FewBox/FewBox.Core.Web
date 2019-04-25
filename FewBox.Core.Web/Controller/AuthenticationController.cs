@@ -17,22 +17,21 @@ namespace FewBox.Core.Web.Controller
     public class AuthenticationController : ControllerBase
     {
         private ITokenService TokenService { get; set; }
-        private IRemoteAuthenticationService RemoteAuthenticationService { get; set; }
+        private IAuthenticationService AuthenticationService { get; set; }
         private JWTConfig JWTConfig { get; set; }
 
-        public AuthenticationController(ITokenService tokenService, IRemoteAuthenticationService remoteAuthenticationService, JWTConfig jWTConfig)
+        public AuthenticationController(ITokenService tokenService, IAuthenticationService authenticationService, JWTConfig jWTConfig)
         {
             this.TokenService = tokenService;
-            this.RemoteAuthenticationService = remoteAuthenticationService;
+            this.AuthenticationService = authenticationService;
             this.JWTConfig = jWTConfig;
         }
 
-        [AllowAnonymous]
         [HttpPost("signin")]
         public SignInResponseDto SignIn([FromBody]SignInRequestDto signInRequestDto)
         {
             IList<string> roles;
-            if(this.RemoteAuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out roles))
+            if(this.AuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out roles))
             {
                 var claims = from role in roles
                 select new Claim(ClaimTypes.Role, role);
@@ -42,7 +41,12 @@ namespace FewBox.Core.Web.Controller
                     Issuer = this.JWTConfig.Issuer,
                     Claims = claims
                 };
-                string token = this.TokenService.GenerateToken(userInfo, signInRequestDto.ExpiredTime);
+                TimeSpan expiredTime;
+                if(!TimeSpan.TryParse(signInRequestDto.ExpiredTimeSpan, out expiredTime))
+                {
+                    expiredTime = ExpireTimes.Token;
+                }
+                string token = this.TokenService.GenerateToken(userInfo, expiredTime);
                 return new SignInResponseDto { IsValid = true, Token = token };
             }
             else
@@ -51,9 +55,8 @@ namespace FewBox.Core.Web.Controller
             }
         }
 
-        [AllowAnonymous]
         [HttpPost("renewtoken")]
-        [RemoteRoleAuthorize(Policy="RemoteRole_Pure")]
+        [Authorize("JWTRole_None")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
             var userInfo = new UserInfo { 
@@ -62,14 +65,20 @@ namespace FewBox.Core.Web.Controller
                 Issuer = this.JWTConfig.Issuer,
                 Claims = this.HttpContext.User.Claims
             };
-            string token = this.TokenService.GenerateToken(userInfo, renewTokenRequestDto.ExpiredTime);
+            TimeSpan expiredTime;
+            if(!TimeSpan.TryParse(renewTokenRequestDto.ExpiredTimeSpan, out expiredTime))
+            {
+                expiredTime = ExpireTimes.Token;
+            }
+            string token = this.TokenService.GenerateToken(userInfo, expiredTime);
             return new RenewTokenResponseDto { Token = token };
         }
 
-        [AllowAnonymous]
         [HttpGet("currentclaims")]
+        [Authorize("JWTRole_None")]
         public object GetCurrentClaims()
         {
+            int i = this.User.Claims.Count();
             return User.Claims.Select(c =>
             new
             {

@@ -16,6 +16,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using FewBox.App.Demo.Stub;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using FewBox.Core.Web.Config;
+using System.Security.Claims;
 
 namespace FewBox.App.Demo
 {
@@ -36,9 +37,9 @@ namespace FewBox.App.Demo
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
             services.AddScoped<ITokenService, JWTToken>();
-            services.AddSingleton<IAuthorizationHandler, RemoteRoleHandler>();
-            services.AddSingleton<IAuthorizationPolicyProvider, RemoteRoleAuthorizationPolicyProvider>();
-            services.AddSingleton<IRemoteAuthenticationService, StubRemoteAuthenticationService>();
+            services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
+            services.AddSingleton<IAuthenticationService, StubAuthenticationService>();
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -47,7 +48,7 @@ namespace FewBox.App.Demo
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtConfig.Issuer,
