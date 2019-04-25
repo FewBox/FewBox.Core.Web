@@ -54,5 +54,31 @@ namespace FewBox.Core.Core.UnitTest
             Thread.Sleep(expiredTime);
             Assert.IsFalse(this.TokenService.ValidateToken(token, this.Key, this.Issuer));
         }
+
+        [TestMethod]
+        public void TestTokenLengthGe16()
+        {
+            var userInfo = new UserInfo { 
+                Id = Guid.NewGuid().ToString(),
+                Key = "1234567890123456",
+                Issuer = this.Issuer,
+                Claims = new List<Claim>{
+                }
+            };
+            Assert.IsNotNull(this.TokenService.GenerateToken(userInfo));
+        }
+
+        [TestMethod]
+        public void TestTokenLengthLe16()
+        {
+            UserInfo userInfo;
+            Assert.ThrowsException<UserInfoKeyLengthException>(()=> userInfo = new UserInfo { 
+                Id = Guid.NewGuid().ToString(),
+                Key = "123456789012345",
+                Issuer = this.Issuer,
+                Claims = new List<Claim>{
+                }
+            });
+        }
     }
 }
