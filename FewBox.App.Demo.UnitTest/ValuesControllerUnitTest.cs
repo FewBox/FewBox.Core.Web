@@ -25,7 +25,7 @@ namespace FewBox.App.Demo.UnitTest
             IList<string> roles = new List<string> { "Admin" };
             this.RemoteAuthenticationService = Mock.Of<IRemoteAuthenticationService>(l=>
                 l.FindRolesByControllerAndAction(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IHeaderDictionary>())==new List<string>{} &&
-                l.IsValid(It.IsAny<string>(), It.IsAny<string>(), out roles ) == true);
+                l.IsValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), out roles ) == true);
             this.JWTConfig = new JWTConfig{
                 Key = "EnVsakc0bNXs1UYHAiOjE1ND",
                 Issuer = "https://fewbox.com"
