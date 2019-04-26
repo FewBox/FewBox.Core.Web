@@ -19,38 +19,43 @@ namespace FewBox.Core.Web.Security
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
         {
+            string method = this.ActionContextAccessor.ActionContext.HttpContext.Request.Method;
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
-            IList<string> roles;
-            if(requirement!=null)
+            IList<string> roles = null;
+            if(requirement != null)
             {
-                if(requirement.RolePolicyType == RolePolicyType.Header)
+                if(requirement.RolePolicyType == RolePolicyType.ControllerAction||
+                requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
+                {
+                    roles = this.AuthenticationService.FindRolesByControllerAndAction(controller, action);
+                }
+                else if(requirement.RolePolicyType == RolePolicyType.Method||
+                requirement.RolePolicyType == RolePolicyType.Method)
+                {
+                    roles = this.AuthenticationService.FindRolesByMethod(method);
+                }
+                if(requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog||
+                requirement.RolePolicyType == RolePolicyType.MethodWithLog)
                 {
                     Console.WriteLine($"Controller: {controller}");
                     Console.WriteLine($"Action: {action}");
+                    Console.WriteLine($"Method: {method}");
                     foreach(var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
                     {
                         Console.WriteLine($"Header: {header.Key} - {header.Value}");
                     }
                 }
-                else if(requirement.RolePolicyType == RolePolicyType.Cookie)
-                {
-                    Console.WriteLine($"Controller: {controller}");
-                    Console.WriteLine($"Action: {action}");
-                    foreach(var cookie in this.ActionContextAccessor.ActionContext.HttpContext.Request.Cookies)
-                    {
-                        Console.WriteLine($"Header: {cookie.Key} - {cookie.Value}");
-                    }
-                }
             }
-            roles = this.AuthenticationService.FindRolesByControllerAndAction(controller, action, this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers);
-            foreach(string role in roles)
+            if(roles != null)
             {
-                // Todo: Always return false.
-                if(context.User.IsInRole(role))
+                foreach(string role in roles)
                 {
-                    context.Succeed(requirement);
-                    break;
+                    if(context.User.IsInRole(role))
+                    {
+                        context.Succeed(requirement);
+                        break;
+                    }
                 }
             }
             return Task.CompletedTask;

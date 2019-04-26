@@ -6,9 +6,28 @@ namespace FewBox.App.Demo.Stub
 {
     public class StubAuthenticationService : IAuthenticationService
     {
-        public IList<string> FindRolesByControllerAndAction(string controller, string action, IHeaderDictionary headers)
+        public IList<string> FindRolesByControllerAndAction(string controller, string action)
         {
-            return new List<string> { "Admin" };
+            if(action.Contains("Get"))
+            {
+                return new List<string>{ "Admin", "Normal" };
+            }
+            else
+            {
+                return new List<string> { "Admin" };
+            }
+        }
+
+        public IList<string> FindRolesByMethod(string method)
+        {
+            if(HttpMethods.IsGet(method))
+            {
+                return new List<string> { "Admin", "Normal" };
+            }
+            else
+            {
+                return new List<string> { "Admin" };
+            }
         }
         public bool IsValid(string username, string password, string userType, out IList<string> roles)
         {

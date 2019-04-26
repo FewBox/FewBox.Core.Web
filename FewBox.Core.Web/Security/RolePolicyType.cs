@@ -2,8 +2,9 @@
 {
     public enum RolePolicyType
     {
-        None,
-        Header,
-        Cookie
+        ControllerAction,
+        Method,
+        ControllerActionWithLog,
+        MethodWithLog
     }
 }

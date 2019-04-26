@@ -56,7 +56,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpPost("renewtoken")]
-        [Authorize("JWTRole_None")]
+        [Authorize("JWTRole_ControllerAction")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
             var userInfo = new UserInfo { 
@@ -75,7 +75,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpGet("currentclaims")]
-        [Authorize("JWTRole_None")]
+        [Authorize("JWTRole_ControllerAction")]
         public object GetCurrentClaims()
         {
             int i = this.User.Claims.Count();

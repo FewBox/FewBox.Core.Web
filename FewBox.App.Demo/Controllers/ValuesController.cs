@@ -23,15 +23,15 @@ namespace FewBox.App.Demo.Controllers
             };
         }
 
-        [HttpGet("logheader")]
-        [Authorize(Policy="JWTRole_Header")]
+        [HttpGet("controllerandaction")]
+        [Authorize(Policy="JWTRole_ControllerAction")]
         public IList<Value> GetByWithHeader()
         {
             return this.Values;
         }
 
-        [HttpGet("logcookie")]
-        [Authorize(Policy="JWTRole_Cookie")]
+        [HttpGet("method")]
+        [Authorize(Policy="JWTRole_Method")]
         public IList<Value> GetByWithCookie()
         {
             return this.Values;
