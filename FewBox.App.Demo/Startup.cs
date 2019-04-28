@@ -17,6 +17,11 @@ using FewBox.App.Demo.Stub;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using FewBox.Core.Web.Config;
 using System.Security.Claims;
+using FewBox.App.Demo.Repositories;
+using FewBox.Core.Persistence.Orm;
+using FewBox.Core.Web.Orm;
+using FewBox.Core.Web.Filter;
+using FewBox.App.Demo.Handlers;
 
 namespace FewBox.App.Demo
 {
@@ -33,13 +38,23 @@ namespace FewBox.App.Demo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options => {
+                options.Filters.Add<ExceptionAsyncFilter>();
+                options.Filters.Add<TransactionAsyncFilter>();
+                options.Filters.Add<TraceAsyncFilter>();
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
             services.AddScoped<ITokenService, JWTToken>();
-            services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+            services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
-            services.AddSingleton<IAuthenticationService, StubAuthenticationService>();
+            services.AddScoped<IAuthenticationService, StubAuthenticationService>();
+            services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
+            services.AddScoped<IOrmSession, MySqlSession>();
+            services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
+            services.AddScoped<IAppRepository, AppRepository>();
+            services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
+            services.AddScoped<ITraceLogger, ConsonleTraceLogger>();
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
