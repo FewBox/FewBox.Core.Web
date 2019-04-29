@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Collections.Generic;
 using FewBox.Core.Persistence.Orm;
 using Microsoft.AspNetCore.Http;
+using FewBox.Core.Utility.Converter;
 
 namespace FewBox.Core.Web.Token
 {
@@ -23,7 +24,7 @@ namespace FewBox.Core.Web.Token
             var claim = this.HttpContextAccessor.HttpContext.User.Claims.Where(p=>p.Type==TokenClaims.Id).FirstOrDefault();
             if(claim!=null)
             {
-                id = (T)Convert.ChangeType(claim.Value, typeof(T));;
+                id = TypeUtility.Converte<T>(claim.Value);
             }
             return id;
         }
