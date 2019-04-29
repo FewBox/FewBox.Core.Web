@@ -56,14 +56,16 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpPost("renewtoken")]
-        [Authorize("JWTRole_ControllerAction")]
+        //[Authorize("JWTRole_ControllerAction")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
+            var claims = this.HttpContext.User.Claims.Where(
+                c => c.Type==ClaimTypes.Role);
             var userInfo = new UserInfo { 
                 Id = Guid.NewGuid().ToString(),
                 Key = this.JWTConfig.Key,
                 Issuer = this.JWTConfig.Issuer,
-                Claims = this.HttpContext.User.Claims
+                Claims = claims
             };
             TimeSpan expiredTime;
             if(!TimeSpan.TryParse(renewTokenRequestDto.ExpiredTimeSpan, out expiredTime))
