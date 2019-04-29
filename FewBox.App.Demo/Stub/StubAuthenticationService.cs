@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FewBox.Core.Web.Security;
 using Microsoft.AspNetCore.Http;
 
@@ -29,8 +30,9 @@ namespace FewBox.App.Demo.Stub
                 return new List<string> { "Admin" };
             }
         }
-        public bool IsValid(string username, string password, string userType, out IList<string> roles)
+        public bool IsValid(string username, string password, string userType, out object userId, out IList<string> roles)
         {
+            userId = Guid.NewGuid();
             if(username == "fewbox")
             {
                 roles = new List<string> { "Admin" };

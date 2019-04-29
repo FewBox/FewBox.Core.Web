@@ -23,7 +23,7 @@ namespace FewBox.Core.Core.UnitTest
             Guid userId = Guid.NewGuid();
             this.TokenService = new JWTToken();
             this.UserInfo = new UserInfo { 
-                Id = userId.ToString(),
+                Id = userId,
                 Key = this.Key,
                 Issuer = this.Issuer,
                 Claims = new List<Claim>{
@@ -39,7 +39,7 @@ namespace FewBox.Core.Core.UnitTest
         public void TestToken()
         {
             string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromMinutes(5));
-            Assert.AreEqual(this.UserInfo.Id, this.TokenService.GetUserIdByToken(token));
+            Assert.AreEqual(this.UserInfo.Id.ToString(), this.TokenService.GetUserIdByToken(token));
             Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
             Assert.AreEqual("dev@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
             Assert.AreEqual(2, this.TokenService.GetUserProfileByToken(token).Roles.Count);
@@ -59,7 +59,7 @@ namespace FewBox.Core.Core.UnitTest
         public void TestTokenLengthGe16()
         {
             var userInfo = new UserInfo { 
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Key = "1234567890123456",
                 Issuer = this.Issuer,
                 Claims = new List<Claim>{
@@ -73,7 +73,7 @@ namespace FewBox.Core.Core.UnitTest
         {
             UserInfo userInfo;
             Assert.ThrowsException<UserInfoKeyLengthException>(()=> userInfo = new UserInfo { 
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Key = "123456789012345",
                 Issuer = this.Issuer,
                 Claims = new List<Claim>{

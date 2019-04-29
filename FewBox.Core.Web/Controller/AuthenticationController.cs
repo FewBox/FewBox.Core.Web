@@ -31,12 +31,12 @@ namespace FewBox.Core.Web.Controller
         public SignInResponseDto SignIn([FromBody]SignInRequestDto signInRequestDto)
         {
             IList<string> roles;
-            if(this.AuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out roles))
+            if(this.AuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out object userId, out roles))
             {
                 var claims = from role in roles
                 select new Claim(ClaimTypes.Role, role);
                 var userInfo = new UserInfo { 
-                    Id = Guid.NewGuid().ToString(),
+                    Id = userId.ToString(),
                     Key = this.JWTConfig.Key,
                     Issuer = this.JWTConfig.Issuer,
                     Claims = claims

@@ -23,10 +23,11 @@ namespace FewBox.App.Demo.UnitTest
         public void Init()
         {
             IList<string> roles = new List<string> { "Admin" };
+            object userId = Guid.NewGuid();
             this.AuthenticationService = Mock.Of<IAuthenticationService>(l=>
                 l.FindRolesByControllerAndAction(It.IsAny<string>(), It.IsAny<string>())==new List<string>{} &&
                 l.FindRolesByMethod(It.IsAny<string>())==new List<string>{} &&
-                l.IsValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), out roles ) == true);
+                l.IsValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), out userId, out roles ) == true);
             this.JWTConfig = new JWTConfig{
                 Key = "EnVsakc0bNXs1UYHAiOjE1ND",
                 Issuer = "https://fewbox.com"
