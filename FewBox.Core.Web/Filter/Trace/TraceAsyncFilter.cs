@@ -9,11 +9,11 @@ namespace FewBox.Core.Web.Filter
 {
     public class TraceAsyncFilter : IAsyncActionFilter
     {
-        private ITraceLogger TraceLogger { get; set; }
+        private ITraceHandler TraceHandler { get; set; }
 
-        public TraceAsyncFilter(ITraceLogger traceLogger)
+        public TraceAsyncFilter(ITraceHandler traceHandler)
         {
-            this.TraceLogger = traceLogger;
+            this.TraceHandler = traceHandler;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -27,9 +27,9 @@ namespace FewBox.Core.Web.Filter
                 foreach (string key in context.ActionArguments.Keys)
                 {
                     var argument = context.ActionArguments[key];
-                    string name = String.Format(@"{0}-{1}-{2}", controller, action, argument.GetType());
+                    string name = $"{controller}-{action}-{argument.GetType()}";
                     string prama = JsonUtility.Serialize(argument);
-                    this.TraceLogger.Trace(name, prama);
+                    this.TraceHandler.Trace(name, prama);
                 }
             }
         }

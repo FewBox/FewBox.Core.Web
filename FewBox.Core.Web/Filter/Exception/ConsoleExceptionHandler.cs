@@ -4,19 +4,15 @@ using System;
 
 namespace FewBox.Core.Web.Filter
 {
-    public class LoggerExceptionHandler : BaseExceptionHandler
+    public class ConsoleExceptionHandler : BaseExceptionHandler
     {
-        private ILogger Logger { get; set; }
-
-        public LoggerExceptionHandler(ILogger logger)
-        {
-            this.Logger = logger;
-        }
-
         public override ErrorResponseDto Handle(Exception exception)
         {
             string exceptionDetailString = this.GetExceptionDetail(exception);
-            this.Logger.LogError(exceptionDetailString);
+            ConsoleColor consoleColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"FewBox: {exceptionDetailString}");
+            Console.ForegroundColor = consoleColor;
             return new ErrorResponseDto(exceptionDetailString);
         }
     }

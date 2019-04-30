@@ -1,6 +1,6 @@
 ﻿namespace FewBox.Core.Web.Filter
 {
-    public interface ITraceLogger
+    public interface ITraceHandler
     {
         void Trace(string name, string param);
     }

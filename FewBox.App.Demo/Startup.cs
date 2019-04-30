@@ -16,12 +16,10 @@ using Swashbuckle.AspNetCore.Swagger;
 using FewBox.App.Demo.Stub;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using FewBox.Core.Web.Config;
-using System.Security.Claims;
 using FewBox.App.Demo.Repositories;
 using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Web.Orm;
 using FewBox.Core.Web.Filter;
-using FewBox.App.Demo.Handlers;
 
 namespace FewBox.App.Demo
 {
@@ -54,7 +52,7 @@ namespace FewBox.App.Demo
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             services.AddScoped<IAppRepository, AppRepository>();
             services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
-            services.AddScoped<ITraceLogger, ConsonleTraceLogger>();
+            services.AddScoped<ITraceHandler, ConsoleTraceHandler>();
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

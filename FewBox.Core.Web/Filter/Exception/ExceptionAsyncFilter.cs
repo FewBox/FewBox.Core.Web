@@ -8,12 +8,10 @@ namespace FewBox.Core.Web.Filter
     public class ExceptionAsyncFilter : IAsyncActionFilter
     {
         private IExceptionHandler ExceptionHandler { get; set; }
-        private IOrmSession OrmSession { get; set; }
 
-        public ExceptionAsyncFilter(IExceptionHandler exceptionHandler, IOrmSession ormSession)
+        public ExceptionAsyncFilter(IExceptionHandler exceptionHandler)
         {
             this.ExceptionHandler = exceptionHandler;
-            this.OrmSession = ormSession;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -24,10 +22,6 @@ namespace FewBox.Core.Web.Filter
                 var errorResponseDto = this.ExceptionHandler.Handle(resultContext.Exception);
                 resultContext.Result = new ObjectResult(errorResponseDto);
                 resultContext.ExceptionHandled = true;
-                if (this.OrmSession != null)
-                {
-                    this.OrmSession.Close();
-                }
             }
         }
     }
