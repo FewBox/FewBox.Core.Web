@@ -56,7 +56,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpPost("renewtoken")]
-        //[Authorize("JWTRole_ControllerAction")]
+        [Authorize("JWTRole_ControllerAction")]
         public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
             var claims = this.HttpContext.User.Claims.Where(
