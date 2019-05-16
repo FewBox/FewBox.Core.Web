@@ -28,7 +28,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpPost("signin")]
-        public SignInResponseDto SignIn([FromBody]SignInRequestDto signInRequestDto)
+        public PayloadResponseDto<SignInToken> SignIn([FromBody]SignInRequestDto signInRequestDto)
         {
             IList<string> roles;
             if(this.AuthenticationService.IsValid(signInRequestDto.Username, signInRequestDto.Password, signInRequestDto.UserType, out object userId, out roles))
@@ -47,17 +47,21 @@ namespace FewBox.Core.Web.Controller
                     expiredTime = ExpireTimes.Token;
                 }
                 string token = this.TokenService.GenerateToken(userInfo, expiredTime);
-                return new SignInResponseDto { IsValid = true, Token = token };
+                return new PayloadResponseDto<SignInToken>{
+                    Payload = new SignInToken { IsValid = true, Token = token }
+                };
             }
             else
             {
-                return new SignInResponseDto { IsValid = false };
+                return new PayloadResponseDto<SignInToken>{
+                    Payload = new SignInToken { IsValid = false }
+                };
             }
         }
 
         [HttpPost("renewtoken")]
         [Authorize("JWTRole_ControllerAction")]
-        public RenewTokenResponseDto RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
+        public PayloadResponseDto<RenewToken> RenewToken([FromBody] RenewTokenRequestDto renewTokenRequestDto)
         {
             var claims = this.HttpContext.User.Claims.Where(
                 c => c.Type==ClaimTypes.Role);
@@ -73,7 +77,9 @@ namespace FewBox.Core.Web.Controller
                 expiredTime = ExpireTimes.Token;
             }
             string token = this.TokenService.GenerateToken(userInfo, expiredTime);
-            return new RenewTokenResponseDto { Token = token };
+            return new PayloadResponseDto<RenewToken>{
+                Payload = new RenewToken { Token = token } 
+                };
         }
 
         [HttpGet("currentclaims")]

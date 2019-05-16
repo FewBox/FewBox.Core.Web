@@ -5,8 +5,8 @@
     <Copyright>FewBox (c) 2019</Copyright>
     <PackageLicenseUrl>https://raw.githubusercontent.com/FewBox/FewBox.Core.Web/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://fewbox.com</PackageProjectUrl>
-    <PackageTags>Persistence</PackageTags>
-    <Version>1.0.42</Version>
+    <PackageTags>Web</PackageTags>
+    <Version>1.0.43</Version>
     <PackageIconUrl>https://secure.gravatar.com/avatar/ce54e932b36c8d58321cc956410c37ed</PackageIconUrl>
     <RepositoryUrl>https://github.com/FewBox/FewBox.Core.Web</RepositoryUrl>
     <Company>FewBox</Company>
