@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FewBox.Core.Web.Config;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -8,11 +9,13 @@ namespace FewBox.Core.Web.Security
 {
     public class RoleHandler : AuthorizationHandler<RoleRequirement>
     {
+        private SecurityConfig SecurityConfig { get; set; }
         private IAuthenticationService AuthenticationService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
         
-        public RoleHandler(IAuthenticationService authenticationService, IActionContextAccessor actionContextAccessor)
+        public RoleHandler(SecurityConfig securityConfig, IAuthenticationService authenticationService, IActionContextAccessor actionContextAccessor)
         {
+            this.SecurityConfig = securityConfig;
             this.AuthenticationService = authenticationService;
             this.ActionContextAccessor = actionContextAccessor;
         }
@@ -28,7 +31,7 @@ namespace FewBox.Core.Web.Security
                 if(requirement.RolePolicyType == RolePolicyType.ControllerAction||
                 requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
                 {
-                    roles = this.AuthenticationService.FindRolesByControllerAndAction(controller, action);
+                    roles = this.AuthenticationService.FindRolesByServiceAndControllerAndAction(this.SecurityConfig.Name, controller, action);
                 }
                 else if(requirement.RolePolicyType == RolePolicyType.Method||
                 requirement.RolePolicyType == RolePolicyType.Method)

@@ -7,7 +7,7 @@ namespace FewBox.App.Demo.Stub
 {
     public class StubAuthenticationService : IAuthenticationService
     {
-        public IList<string> FindRolesByControllerAndAction(string controller, string action)
+        public IList<string> FindRolesByServiceAndControllerAndAction(string service, string controller, string action)
         {
             if(action.Contains("Get"))
             {

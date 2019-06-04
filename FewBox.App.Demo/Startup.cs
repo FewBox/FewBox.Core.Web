@@ -43,6 +43,8 @@ namespace FewBox.App.Demo
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
+            var securityConfig = this.Configuration.GetSection("SecurityConfig").Get<SecurityConfig>();
+            services.AddSingleton(securityConfig);
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
@@ -96,7 +98,7 @@ namespace FewBox.App.Demo
             }
 
             app.UseAuthentication();
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseMvc();
             app.UseSwagger();
             app.UseStaticFiles();
