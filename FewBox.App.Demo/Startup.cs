@@ -20,6 +20,8 @@ using FewBox.App.Demo.Repositories;
 using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Web.Orm;
 using FewBox.Core.Web.Filter;
+using Dapper;
+using AutoMapper;
 
 namespace FewBox.App.Demo
 {
@@ -35,6 +37,8 @@ namespace FewBox.App.Demo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler());
+            services.AddAutoMapper();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc(options => {
                 options.Filters.Add<ExceptionAsyncFilter>();
@@ -50,7 +54,8 @@ namespace FewBox.App.Demo
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
             services.AddScoped<IAuthenticationService, StubAuthenticationService>();
             services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
-            services.AddScoped<IOrmSession, MySqlSession>();
+            // services.AddScoped<IOrmSession, MySqlSession>();
+            services.AddScoped<IOrmSession, SQLiteSession>();
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             services.AddScoped<IAppRepository, AppRepository>();
             services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();

@@ -17,6 +17,7 @@ namespace FewBox.Core.Web.Filter
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            this.OrmSession.UnitOfWork.Start();
             var resultContext = await next();
             int count = (((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo).GetCustomAttributes(false).Where(attribute => attribute is TransactionAttribute).Count();
             if (count > 0)
@@ -30,7 +31,7 @@ namespace FewBox.Core.Web.Filter
                     this.OrmSession.UnitOfWork.Rollback();
                 }
             }
-            this.OrmSession.Close();
+            this.OrmSession.UnitOfWork.Stop();
         }
     }
 
