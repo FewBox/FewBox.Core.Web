@@ -12,10 +12,10 @@ namespace FewBox.Core.Web.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class ResourcesController<E, I, D, PD> : MapperController where E : Entity<I>
+    public abstract class ResourcesController<RI, E, I, D, PD> : MapperController where E : Entity<I> where RI : IBaseRepository<E, I>
     {
-        protected IBaseRepository<E, I> Repository { get; set; }
-        protected ResourcesController(IBaseRepository<E, I> repository, IMapper mapper) : base(mapper)
+        protected RI Repository { get; set; }
+        protected ResourcesController(RI repository, IMapper mapper) : base(mapper)
         {
             this.Repository = repository;
         }
@@ -23,7 +23,8 @@ namespace FewBox.Core.Web.Controller
         [HttpGet("count")]
         public PayloadResponseDto<int> GetCount()
         {
-            return new PayloadResponseDto<int> {
+            return new PayloadResponseDto<int>
+            {
                 Payload = this.Repository.Count()
             };
         }

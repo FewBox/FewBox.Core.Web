@@ -8,7 +8,7 @@ using System;
 namespace FewBox.App.Demo.Controllers
 {
     [Route("api/[controller]")]
-    public class FBsController : ResourcesController<FB, Guid, FBDto, FBPersistenceDto>
+    public class FBsController : ResourcesController<IFBRepository, FB, Guid, FBDto, FBPersistenceDto>
     {
         public FBsController(IFBRepository fBRepository, IMapper mapper) : base(fBRepository, mapper)
         {
