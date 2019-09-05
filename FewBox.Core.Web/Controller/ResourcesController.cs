@@ -20,6 +20,14 @@ namespace FewBox.Core.Web.Controller
             this.Repository = repository;
         }
 
+        [HttpGet("count")]
+        public PayloadResponseDto<int> GetCount()
+        {
+            return new PayloadResponseDto<int> {
+                Payload = this.Repository.Count()
+            };
+        }
+
         [HttpGet]
         public PayloadResponseDto<IEnumerable<D>> Get()
         {
