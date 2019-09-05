@@ -21,7 +21,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpGet("count")]
-        public PayloadResponseDto<int> GetCount()
+        public virtual PayloadResponseDto<int> GetCount()
         {
             return new PayloadResponseDto<int>
             {
@@ -30,7 +30,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpGet]
-        public PayloadResponseDto<IEnumerable<D>> Get()
+        public virtual PayloadResponseDto<IEnumerable<D>> Get()
         {
             return new PayloadResponseDto<IEnumerable<D>>
             {
@@ -39,7 +39,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpGet("paging")]
-        public PayloadResponseDto<PagingDto<D>> Get([FromQuery] int pageIndex = 1, int pageRange = 5)
+        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] int pageIndex = 1, int pageRange = 5)
         {
             return new PayloadResponseDto<PagingDto<D>>
             {
@@ -86,7 +86,7 @@ namespace FewBox.Core.Web.Controller
 
         [HttpPatch("{id}")]
         [Transaction]
-        public MetaResponseDto Patch(I id, [FromBody]JsonPatchDocument<E> jsonPatchEntity)
+        public virtual MetaResponseDto Patch(I id, [FromBody]JsonPatchDocument<E> jsonPatchEntity)
         {
             E theEntity = this.Repository.FindOne(id);
             jsonPatchEntity.ApplyTo(theEntity);
@@ -100,7 +100,7 @@ namespace FewBox.Core.Web.Controller
         [HttpPatch("merge/{id}")]
         [Consumes(JsonMergePatchDocument.ContentType)]
         [Transaction]
-        public MetaResponseDto Patch(I id, [FromBody]JsonMergePatchDocument<E> jsonMergePatchEntity)
+        public virtual MetaResponseDto Patch(I id, [FromBody]JsonMergePatchDocument<E> jsonMergePatchEntity)
         {
             E theEntity = this.Repository.FindOne(id);
             jsonMergePatchEntity.ApplyTo(theEntity);
@@ -113,7 +113,7 @@ namespace FewBox.Core.Web.Controller
 
         [HttpDelete("{id}")]
         [Transaction]
-        public PayloadResponseDto<int> Delete(I id)
+        public virtual PayloadResponseDto<int> Delete(I id)
         {
             int effect = this.Repository.Recycle(id);
             return new PayloadResponseDto<int>
