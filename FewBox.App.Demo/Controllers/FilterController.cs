@@ -9,18 +9,18 @@ namespace FewBox.App.Demo.Controllers
     [ApiController]
     public class FilterController : ControllerBase
     {
-        private IAppRepository AppRepository { get; set; }
+        private IFBRepository FBRepository { get; set; }
 
-        public FilterController(IAppRepository appRepository)
+        public FilterController(IFBRepository fbRepository)
         {
-            this.AppRepository = appRepository;
+            this.FBRepository = fbRepository;
         }
 
         [HttpPost("transaction")]
         [Transaction]
         public void TestTransaction()
         {
-            this.AppRepository.Save(new FewBox.App.Demo.Repositories.App { Name = "FewBox" });
+            this.FBRepository.Save(new FB { Name = "FewBox" });
         }
 
         [HttpPost("trace")]

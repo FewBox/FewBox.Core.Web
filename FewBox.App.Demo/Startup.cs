@@ -22,6 +22,7 @@ using FewBox.Core.Web.Orm;
 using FewBox.Core.Web.Filter;
 using Dapper;
 using AutoMapper;
+using Morcatko.AspNetCore.JsonMergePatch;
 
 namespace FewBox.App.Demo
 {
@@ -44,7 +45,7 @@ namespace FewBox.App.Demo
                 options.Filters.Add<ExceptionAsyncFilter>();
                 options.Filters.Add<TransactionAsyncFilter>();
                 options.Filters.Add<TraceAsyncFilter>();
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            }).AddJsonMergePatch().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
             var securityConfig = this.Configuration.GetSection("SecurityConfig").Get<SecurityConfig>();
@@ -57,7 +58,7 @@ namespace FewBox.App.Demo
             // services.AddScoped<IOrmSession, MySqlSession>();
             services.AddScoped<IOrmSession, SQLiteSession>();
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
-            services.AddScoped<IAppRepository, AppRepository>();
+            services.AddScoped<IFBRepository, FBRepository>();
             services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
             services.AddScoped<ITraceHandler, ConsoleTraceHandler>();
             services.AddHttpContextAccessor();
@@ -83,6 +84,7 @@ namespace FewBox.App.Demo
                 c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> {
                     { "Bearer", Enumerable.Empty<string>() },
                 });
+                c.OperationFilter<JsonMergePatchDocumentOperationFilter>();
                 // c.SwaggerDoc("v2", new Info { Title = "FewBox API", Version = "v2" });
                 // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

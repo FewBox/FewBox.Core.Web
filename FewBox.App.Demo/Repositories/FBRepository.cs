@@ -3,10 +3,10 @@ using FewBox.Core.Persistence.Orm;
 
 namespace FewBox.App.Demo.Repositories
 {
-    public class AppRepository : BaseRepository<App, Guid>, IAppRepository
+    public class FBRepository : BaseRepository<FB, Guid>, IFBRepository
     {
-        public AppRepository(IOrmSession ormSession, ICurrentUser<Guid> currentUser) 
-        : base("app", ormSession, currentUser)
+        public FBRepository(IOrmSession ormSession, ICurrentUser<Guid> currentUser) 
+        : base("fb", ormSession, currentUser)
         {
         }
 

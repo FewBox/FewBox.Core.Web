@@ -8,7 +8,6 @@ using FewBox.Core.Web.Token;
 using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Security;
-using Microsoft.AspNetCore.Http;
 
 namespace FewBox.Core.Web.Controller
 {
