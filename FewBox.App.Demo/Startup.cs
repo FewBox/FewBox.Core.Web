@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using FewBox.Core.Web.Security;
 using FewBox.Core.Web.Token;
@@ -12,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Swashbuckle.AspNetCore.Swagger;
 using FewBox.App.Demo.Stub;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using FewBox.Core.Web.Config;
@@ -23,6 +21,8 @@ using FewBox.Core.Web.Filter;
 using Dapper;
 using AutoMapper;
 using Morcatko.AspNetCore.JsonMergePatch;
+using NSwag.SwaggerGeneration.Processors.Security;
+using NSwag;
 
 namespace FewBox.App.Demo
 {
@@ -77,18 +77,36 @@ namespace FewBox.App.Demo
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key))
                 };
             });
-            services.AddSwaggerGen(c =>
+            services.AddOpenApiDocument(config =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "FewBox API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new ApiKeyScheme { In = "header", Description = @"Please enter JWT with Bearer into field. Example: 'Bearer {token}'", Name = "Authorization", Type = "apiKey" });
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> {
-                    { "Bearer", Enumerable.Empty<string>() },
-                });
-                c.OperationFilter<JsonMergePatchDocumentOperationFilter>();
-                // c.SwaggerDoc("v2", new Info { Title = "FewBox API", Version = "v2" });
-                // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                // c.IncludeXmlComments(xmlPath);
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "FewBox demo Api";
+                    document.Info.Description = "FewBox shipping, for more information please visit the 'https://fewbox.com'";
+                    document.Info.TermsOfService = "https://fewbox.com/terms";
+                    document.Info.Contact = new NSwag.SwaggerContact
+                    {
+                        Name = "FewBox",
+                        Email = "support@fewbox.com",
+                        Url = "https://fewbox.com/support"
+                    };
+                    document.Info.License = new NSwag.SwaggerLicense
+                    {
+                        Name = "Use under license",
+                        Url = "https://raw.githubusercontent.com/FewBox/FewBox.Service.Shipping/master/LICENSE"
+                    };
+                };
+                config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT"));
+                config.DocumentProcessors.Add(
+                    new SecurityDefinitionAppender("JWT", new List<string> { "API" }, new SwaggerSecurityScheme
+                    {
+                        Type = SwaggerSecuritySchemeType.ApiKey,
+                        Name = "Authorization",
+                        Description = "Bearer [Token]",
+                        In = SwaggerSecurityApiKeyLocation.Header
+                    })
+                );
             });
         }
 
@@ -109,12 +127,14 @@ namespace FewBox.App.Demo
             app.UseMvc();
             app.UseSwagger();
             app.UseStaticFiles();
-            app.UseSwaggerUI(c =>
+            if (env.IsDevelopment() || env.IsStaging())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FewBox API V1");
-                // c.SwaggerEndpoint("/swagger/v2/swagger.json", "FewBox API V2");
-                c.RoutePrefix = String.Empty;
-            });
+                app.UseSwaggerUi3();
+            }
+            else
+            {
+                app.UseReDoc();
+            }
         }
     }
 }
