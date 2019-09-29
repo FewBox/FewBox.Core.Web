@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using FewBox.App.Demo.Stub;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using FewBox.Core.Web.Config;
 using FewBox.App.Demo.Repositories;
@@ -53,7 +52,6 @@ namespace FewBox.App.Demo
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
-            services.AddScoped<IAuthenticationService, StubAuthenticationService>();
             services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
             // services.AddScoped<IOrmSession, MySqlSession>();
             services.AddScoped<IOrmSession, SQLiteSession>();

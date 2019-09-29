@@ -10,13 +10,13 @@ namespace FewBox.Core.Web.Security
     public class RoleHandler : AuthorizationHandler<RoleRequirement>
     {
         private SecurityConfig SecurityConfig { get; set; }
-        private IAuthenticationService AuthenticationService { get; set; }
+        private IAuthService AuthService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
         
-        public RoleHandler(SecurityConfig securityConfig, IAuthenticationService authenticationService, IActionContextAccessor actionContextAccessor)
+        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, IActionContextAccessor actionContextAccessor)
         {
             this.SecurityConfig = securityConfig;
-            this.AuthenticationService = authenticationService;
+            this.AuthService = authService;
             this.ActionContextAccessor = actionContextAccessor;
         }
 
@@ -31,12 +31,12 @@ namespace FewBox.Core.Web.Security
                 if(requirement.RolePolicyType == RolePolicyType.ControllerAction||
                 requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
                 {
-                    roles = this.AuthenticationService.FindRolesByServiceAndControllerAndAction(this.SecurityConfig.Name, controller, action);
+                    roles = this.AuthService.FindRoles(this.SecurityConfig.Name, controller, action);
                 }
                 else if(requirement.RolePolicyType == RolePolicyType.Method||
                 requirement.RolePolicyType == RolePolicyType.Method)
                 {
-                    roles = this.AuthenticationService.FindRolesByMethod(method);
+                    roles = this.AuthService.FindRoles(method);
                 }
                 if(requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog||
                 requirement.RolePolicyType == RolePolicyType.MethodWithLog)
