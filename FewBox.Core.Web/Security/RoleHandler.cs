@@ -29,7 +29,7 @@ namespace FewBox.Core.Web.Security
             string method = this.ActionContextAccessor.ActionContext.HttpContext.Request.Method;
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
-            string token = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authentication"];
+            string token = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authorization"];
             var userProfile = this.TokenService.GetUserProfileByToken(token);
 
             bool doesUserHavePermission = false;
