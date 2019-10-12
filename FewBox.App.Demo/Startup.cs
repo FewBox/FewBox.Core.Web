@@ -22,6 +22,7 @@ using AutoMapper;
 using Morcatko.AspNetCore.JsonMergePatch;
 using NSwag.SwaggerGeneration.Processors.Security;
 using NSwag;
+using FewBox.App.Demo.Stub;
 
 namespace FewBox.App.Demo
 {
@@ -37,6 +38,7 @@ namespace FewBox.App.Demo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<ITokenService, JWTToken>();
             SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler());
             services.AddAutoMapper();
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -52,6 +54,7 @@ namespace FewBox.App.Demo
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
+            services.AddScoped<IAuthService, StubAuthenticationService>();
             services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
             // services.AddScoped<IOrmSession, MySqlSession>();
             services.AddScoped<IOrmSession, SQLiteSession>();

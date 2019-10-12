@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FewBox.Core.Web.Config;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,7 @@ namespace FewBox.Core.Web.Security
         private SecurityConfig SecurityConfig { get; set; }
         private IAuthService AuthService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
-        
+
         public RoleHandler(SecurityConfig securityConfig, IAuthService authService, IActionContextAccessor actionContextAccessor)
         {
             this.SecurityConfig = securityConfig;
@@ -26,35 +27,46 @@ namespace FewBox.Core.Web.Security
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
             IList<string> roles = null;
-            if(requirement != null)
+            if (requirement != null)
             {
-                if(requirement.RolePolicyType == RolePolicyType.ControllerAction||
+                if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
                 requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
                 {
                     roles = this.AuthService.FindRoles(this.SecurityConfig.Name, controller, action);
                 }
-                else if(requirement.RolePolicyType == RolePolicyType.Method||
+                else if (requirement.RolePolicyType == RolePolicyType.Method ||
                 requirement.RolePolicyType == RolePolicyType.Method)
                 {
                     roles = this.AuthService.FindRoles(method);
                 }
-                if(requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog||
+                if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
                 requirement.RolePolicyType == RolePolicyType.MethodWithLog)
                 {
                     Console.WriteLine($"Controller: {controller}");
                     Console.WriteLine($"Action: {action}");
                     Console.WriteLine($"Method: {method}");
-                    foreach(var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
+                    foreach (var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
                     {
                         Console.WriteLine($"Header: {header.Key} - {header.Value}");
                     }
+                    foreach (var claim in context.User.Claims)
+                    {
+                        Console.WriteLine($"Claim: {claim.Type}-{claim.Value}");
+                    }
                 }
             }
-            if(roles != null)
+            if (roles != null)
             {
-                foreach(string role in roles)
+                foreach (string role in roles)
                 {
-                    if(context.User.IsInRole(role))
+                    if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
+                    requirement.RolePolicyType == RolePolicyType.MethodWithLog)
+                    {
+                        Console.WriteLine($"Role: {role}");
+                        Console.WriteLine($"Role: {context.User.Claims}");
+                        Console.WriteLine($"IsInRole: {context.User.IsInRole(role)}");
+                    }
+                    if (context.User.IsInRole(role))
                     {
                         context.Succeed(requirement);
                         break;
