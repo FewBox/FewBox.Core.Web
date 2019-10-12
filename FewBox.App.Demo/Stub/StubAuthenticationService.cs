@@ -1,33 +1,18 @@
 using System.Collections.Generic;
 using FewBox.Core.Web.Security;
-using Microsoft.AspNetCore.Http;
 
 namespace FewBox.App.Demo.Stub
 {
     public class StubAuthenticationService : IAuthService
     {
-        public IList<string> FindRoles(string service, string controller, string action)
+        public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
         {
-            if(action.Contains("Get"))
-            {
-                return new List<string>{ "Admin", "Normal" };
-            }
-            else
-            {
-                return new List<string> { "Admin" };
-            }
+            return true;
         }
 
-        public IList<string> FindRoles(string method)
+        public bool DoesUserHavePermission(string method, IList<string> roles)
         {
-            if(HttpMethods.IsGet(method))
-            {
-                return new List<string> { "Admin", "Normal" };
-            }
-            else
-            {
-                return new List<string> { "Admin" };
-            }
+            return true;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FewBox.Core.Web.Config;
+using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -12,12 +13,14 @@ namespace FewBox.Core.Web.Security
     {
         private SecurityConfig SecurityConfig { get; set; }
         private IAuthService AuthService { get; set; }
+        private ITokenService TokenService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
 
-        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, IActionContextAccessor actionContextAccessor)
+        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IActionContextAccessor actionContextAccessor)
         {
             this.SecurityConfig = securityConfig;
             this.AuthService = authService;
+            this.TokenService = tokenService;
             this.ActionContextAccessor = actionContextAccessor;
         }
 
@@ -26,18 +29,21 @@ namespace FewBox.Core.Web.Security
             string method = this.ActionContextAccessor.ActionContext.HttpContext.Request.Method;
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
-            IList<string> roles = null;
+            string token = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authentication"];
+            var userProfile = this.TokenService.GetUserProfileByToken(token);
+
+            bool doesUserHavePermission = false;
             if (requirement != null)
             {
                 if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
                 requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
                 {
-                    roles = this.AuthService.FindRoles(this.SecurityConfig.Name, controller, action);
+                    doesUserHavePermission = this.AuthService.DoesUserHavePermission(this.SecurityConfig.Name, controller, action, userProfile.Roles);
                 }
                 else if (requirement.RolePolicyType == RolePolicyType.Method ||
                 requirement.RolePolicyType == RolePolicyType.Method)
                 {
-                    roles = this.AuthService.FindRoles(method);
+                    doesUserHavePermission = this.AuthService.DoesUserHavePermission(method, userProfile.Roles);
                 }
                 if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
                 requirement.RolePolicyType == RolePolicyType.MethodWithLog)
@@ -55,23 +61,9 @@ namespace FewBox.Core.Web.Security
                     }
                 }
             }
-            if (roles != null)
+            if (doesUserHavePermission)
             {
-                foreach (string role in roles)
-                {
-                    if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
-                    requirement.RolePolicyType == RolePolicyType.MethodWithLog)
-                    {
-                        Console.WriteLine($"Role: {role}");
-                        Console.WriteLine($"Role: {context.User.Claims}");
-                        Console.WriteLine($"IsInRole: {context.User.IsInRole(role)}");
-                    }
-                    if (context.User.IsInRole(role))
-                    {
-                        context.Succeed(requirement);
-                        break;
-                    }
-                }
+                context.Succeed(requirement);
             }
             return Task.CompletedTask;
         }
