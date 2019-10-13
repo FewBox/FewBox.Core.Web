@@ -30,34 +30,36 @@ namespace FewBox.Core.Web.Security
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
             string token = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authorization"];
-            var userProfile = this.TokenService.GetUserProfileByToken(token);
-
             bool doesUserHavePermission = false;
-            if (requirement != null)
+            if (!String.IsNullOrEmpty(token))
             {
-                if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
-                requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
+                var userProfile = this.TokenService.GetUserProfileByToken(token);
+                if (requirement != null)
                 {
-                    doesUserHavePermission = this.AuthService.DoesUserHavePermission(this.SecurityConfig.Name, controller, action, userProfile.Roles);
-                }
-                else if (requirement.RolePolicyType == RolePolicyType.Method ||
-                requirement.RolePolicyType == RolePolicyType.Method)
-                {
-                    doesUserHavePermission = this.AuthService.DoesUserHavePermission(method, userProfile.Roles);
-                }
-                if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
-                requirement.RolePolicyType == RolePolicyType.MethodWithLog)
-                {
-                    Console.WriteLine($"Controller: {controller}");
-                    Console.WriteLine($"Action: {action}");
-                    Console.WriteLine($"Method: {method}");
-                    foreach (var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
+                    if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
+                    requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
                     {
-                        Console.WriteLine($"Header: {header.Key} - {header.Value}");
+                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(this.SecurityConfig.Name, controller, action, userProfile.Roles);
                     }
-                    foreach (var claim in context.User.Claims)
+                    else if (requirement.RolePolicyType == RolePolicyType.Method ||
+                    requirement.RolePolicyType == RolePolicyType.Method)
                     {
-                        Console.WriteLine($"Claim: {claim.Type}-{claim.Value}");
+                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(method, userProfile.Roles);
+                    }
+                    if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
+                    requirement.RolePolicyType == RolePolicyType.MethodWithLog)
+                    {
+                        Console.WriteLine($"Controller: {controller}");
+                        Console.WriteLine($"Action: {action}");
+                        Console.WriteLine($"Method: {method}");
+                        foreach (var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
+                        {
+                            Console.WriteLine($"Header: {header.Key} - {header.Value}");
+                        }
+                        foreach (var claim in context.User.Claims)
+                        {
+                            Console.WriteLine($"Claim: {claim.Type}-{claim.Value}");
+                        }
                     }
                 }
             }
