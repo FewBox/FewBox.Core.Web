@@ -22,10 +22,6 @@ namespace FewBox.Core.Web.Security
         {
             var headers = new List<Header>();
             PayloadResponseDto<IList<string>> response;
-            foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
-            {
-                headers.Add(new Header { Key = header.Key, Value = header.Value });
-            }
             if (this.HttpContextAccessor.HttpContext.Request.Headers.Keys.Contains("Authorization"))
             {
                 response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}",
