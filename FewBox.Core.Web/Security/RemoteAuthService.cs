@@ -21,12 +21,23 @@ namespace FewBox.Core.Web.Security
         public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
         {
             var headers = new List<Header>();
+            PayloadResponseDto<IList<string>> response;
             foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
             {
                 headers.Add(new Header { Key = header.Key, Value = header.Value });
             }
-            var respose = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}", headers);
-            return respose.Payload.Intersect(roles).Count() > 0;
+            if (this.HttpContextAccessor.HttpContext.Request.Headers.Keys.Contains("Authorization"))
+            {
+                response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}",
+                this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"],
+                headers);
+            }
+            else
+            {
+                response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}",
+                headers);
+            }
+            return response.Payload.Intersect(roles).Count() > 0;
 
         }
 
