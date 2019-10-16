@@ -29,10 +29,11 @@ namespace FewBox.Core.Web.Security
             string method = this.ActionContextAccessor.ActionContext.HttpContext.Request.Method;
             string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
             string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
-            string token = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authorization"];
+            string authorization = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authorization"];
             bool doesUserHavePermission = false;
-            if (!String.IsNullOrEmpty(token))
+            if (!String.IsNullOrEmpty(authorization))
             {
+                string token = authorization.Replace("Bearer ", String.Empty);
                 var userProfile = this.TokenService.GetUserProfileByToken(token);
                 if (requirement != null)
                 {
