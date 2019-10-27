@@ -33,7 +33,7 @@ namespace FewBox.Core.Web.Security
             bool doesUserHavePermission = false;
             if (!String.IsNullOrEmpty(authorization))
             {
-                string token = authorization.Replace("Bearer ", String.Empty);
+                string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
                 var userProfile = this.TokenService.GetUserProfileByToken(token);
                 if (requirement != null)
                 {
