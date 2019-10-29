@@ -1,18 +1,22 @@
 ﻿using FewBox.Core.Web.Dto;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
 {
-    public class ConsoleExceptionHandler : BaseExceptionHandler
+    public class ConsoleExceptionHandler : IExceptionHandler
     {
-        public override ErrorResponseDto Handle(Exception exception)
+        public async Task<ErrorResponseDto> Handle(string name, string param)
         {
-            string exceptionDetailString = this.GetExceptionDetail(exception);
-            ConsoleColor consoleColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"FewBox: {exceptionDetailString}");
-            Console.ForegroundColor = consoleColor;
+            string exceptionDetailString = String.Empty;
+            await Task.Run(() =>
+            {
+                ConsoleColor consoleColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"FewBox: {name} - {param}");
+                Console.ForegroundColor = consoleColor;
+            });
             return new ErrorResponseDto(exceptionDetailString);
         }
     }

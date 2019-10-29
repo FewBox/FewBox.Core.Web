@@ -1,17 +1,19 @@
-using FewBox.Core.Web.Dto;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
 {
     public class ConsoleTraceHandler : ITraceHandler
     {
-        public void Trace(string name, string param)
+        public async Task Trace(string name, string param)
         {
-            ConsoleColor consoleColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"FewBox: {name} - {param}");
-            Console.ForegroundColor = consoleColor;
+            await Task.Run(() =>
+            {
+                ConsoleColor consoleColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"FewBox: {name} - {param}");
+                Console.ForegroundColor = consoleColor;
+            });
         }
     }
 }

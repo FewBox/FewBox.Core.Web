@@ -29,7 +29,7 @@ namespace FewBox.Core.Web.Filter
                     var argument = context.ActionArguments[key];
                     string name = $"{controller}-{action}-{argument.GetType()}";
                     string prama = JsonUtility.Serialize(argument);
-                    this.TraceHandler.Trace(name, prama);
+                    await this.TraceHandler.Trace(name, prama);
                 }
             }
         }

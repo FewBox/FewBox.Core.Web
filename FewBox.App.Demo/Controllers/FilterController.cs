@@ -27,6 +27,7 @@ namespace FewBox.App.Demo.Controllers
         [Trace]
         public void TestTrace(TraceInfo traceInfo)
         {
+            Console.WriteLine("TestTrace");
         }
 
         [HttpPost("exception")]
