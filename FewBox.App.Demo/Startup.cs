@@ -131,7 +131,6 @@ namespace FewBox.App.Demo
 
             app.UseAuthentication();
             app.UseHttpsRedirection();
-            app.UseMvc();
             app.UseSwagger();
             app.UseStaticFiles();
             if (env.IsDevelopment() || env.IsStaging())
@@ -142,6 +141,7 @@ namespace FewBox.App.Demo
             {
                 app.UseReDoc();
             }
+            app.UseMvc();
         }
     }
 }
