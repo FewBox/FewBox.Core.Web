@@ -46,7 +46,7 @@ namespace FewBox.Core.Core.UnitTest
             Assert.AreEqual(2, this.TokenService.GetUserProfileByToken(token).Roles.Count);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestExpiredToken()
         {
             TimeSpan expiredTime = TimeSpan.FromSeconds(1);
