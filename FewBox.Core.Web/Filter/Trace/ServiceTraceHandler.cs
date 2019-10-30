@@ -20,7 +20,7 @@ namespace FewBox.Core.Web.Filter
             {
                 TryCatch(() =>
                 {
-                    RestfulUtility.Post<LogRequestDto, LogResponseDto>($"{this.LogConfig.Protocol}://{this.LogConfig.Host}:{this.LogConfig.Port}/api/log", new Package<LogRequestDto>
+                    RestfulUtility.Post<LogRequestDto, LogResponseDto>($"{this.LogConfig.Protocol}://{this.LogConfig.Host}:{this.LogConfig.Port}/api/logs", new Package<LogRequestDto>
                     {
                         Headers = new List<Header> { },
                         Body = new LogRequestDto
