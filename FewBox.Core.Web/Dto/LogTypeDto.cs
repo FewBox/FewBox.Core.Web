@@ -1,4 +1,4 @@
-namespace FewBox.Core.Web.Dto
+﻿namespace FewBox.Core.Web.Dto
 {
     public enum LogTypeDto
     {

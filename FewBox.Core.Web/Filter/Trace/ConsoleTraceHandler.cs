@@ -3,15 +3,15 @@ using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
 {
-    public class ConsoleTraceHandler : ITraceHandler
+    public class ConsoleTraceHandler : BaseTraceHandler
     {
-        public async Task Trace(string name, string param)
+        protected override void Trace(string name, string param)
         {
-            await Task.Run(() =>
+            Task.Run(() =>
             {
                 ConsoleColor consoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine($"FewBox: {name} - {param}");
+                Console.WriteLine($"[FewBox-Trace] {name} - {param}");
                 Console.ForegroundColor = consoleColor;
             });
         }

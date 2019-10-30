@@ -18,20 +18,20 @@ namespace FewBox.Core.Web.Filter
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var resultContext = await next();
-            string controller = context.ActionDescriptor.RouteValues["controller"];
-            string action = context.ActionDescriptor.RouteValues["action"];
             int count = (((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo).GetCustomAttributes(false).Where(attribute => attribute is TraceAttribute).Count();
             if (count > 0)
             {
+                string controller = context.ActionDescriptor.RouteValues["controller"];
+                string action = context.ActionDescriptor.RouteValues["action"];
                 foreach (string key in context.ActionArguments.Keys)
                 {
                     var argument = context.ActionArguments[key];
                     string name = $"{controller}-{action}-{argument.GetType()}";
                     string prama = JsonUtility.Serialize(argument);
-                    await this.TraceHandler.Trace(name, prama);
+                    this.TraceHandler.Trace(name, prama);
                 }
             }
+            var resultContext = await next();
         }
     }
 }

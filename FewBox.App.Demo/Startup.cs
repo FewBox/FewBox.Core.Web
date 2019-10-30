@@ -51,6 +51,10 @@ namespace FewBox.App.Demo
             services.AddSingleton(jwtConfig);
             var securityConfig = this.Configuration.GetSection("SecurityConfig").Get<SecurityConfig>();
             services.AddSingleton(securityConfig);
+            var logConfig = this.Configuration.GetSection("LogConfig").Get<LogConfig>();
+            services.AddSingleton(logConfig);
+            var notificationConfig = this.Configuration.GetSection("NotificationConfig").Get<NotificationConfig>();
+            services.AddSingleton(notificationConfig);
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
@@ -62,6 +66,8 @@ namespace FewBox.App.Demo
             services.AddScoped<IFBRepository, FBRepository>();
             services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
             services.AddScoped<ITraceHandler, ConsoleTraceHandler>();
+            //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();
+            //services.AddScoped<ITraceHandler, ServiceTraceHandler>();
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

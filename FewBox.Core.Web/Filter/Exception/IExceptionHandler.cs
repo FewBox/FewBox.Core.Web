@@ -1,11 +1,9 @@
-﻿using FewBox.Core.Web.Dto;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace FewBox.Core.Web.Filter
 {
     public interface IExceptionHandler
     {
-        Task<ErrorResponseDto> Handle(string name, string param);
+        void Handle(string name, Exception exception);
     }
 }

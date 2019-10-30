@@ -1,5 +1,6 @@
 ﻿using System;
 using FewBox.App.Demo.Repositories;
+using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,13 +26,16 @@ namespace FewBox.App.Demo.Controllers
 
         [HttpPost("trace")]
         [Trace]
-        public void TestTrace(TraceInfo traceInfo)
+        public PayloadResponseDto<string> TestTrace(TraceInfo traceInfo)
         {
             Console.WriteLine("TestTrace");
+            return new PayloadResponseDto<string>{
+                Payload = "TestTrace"
+            };
         }
 
         [HttpPost("exception")]
-        public void TestException()
+        public PayloadResponseDto<string> TestException()
         {
             throw new Exception("Hello FewBox Exception!");
         }

@@ -1,4 +1,5 @@
 ﻿using FewBox.Core.Persistence.Orm;
+using FewBox.Core.Web.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -19,13 +20,13 @@ namespace FewBox.Core.Web.Filter
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var resultContext = await next();
-            string controller = context.ActionDescriptor.RouteValues["controller"];
-            string action = context.ActionDescriptor.RouteValues["action"];
             if (resultContext.Exception != null)
             {
+                string controller = context.ActionDescriptor.RouteValues["controller"];
+                string action = context.ActionDescriptor.RouteValues["action"];
                 string name = $"{controller}-{action}";
-                var errorResponseDto = this.ExceptionHandler.Handle(name, this.GetExceptionDetail(resultContext.Exception));
-                resultContext.Result = new ObjectResult(errorResponseDto);
+                this.ExceptionHandler.Handle(name, resultContext.Exception);
+                resultContext.Result = new ObjectResult(new ErrorResponseDto(this.GetExceptionDetail(resultContext.Exception)));
                 resultContext.ExceptionHandled = true;
             }
         }
