@@ -34,13 +34,19 @@ namespace FewBox.Core.Web.Filter
         private string GetExceptionDetail(Exception exception)
         {
             StringBuilder exceptionDetail = new StringBuilder();
-            exceptionDetail.AppendLine(exception.StackTrace);
-            while (exception != null)
-            {
-                exceptionDetail.AppendLine(exception.Message);
-                exception = exception.InnerException;
-            }
+            this.BuildException(exceptionDetail, exception);
             return exceptionDetail.ToString();
+        }
+
+        private void BuildException(StringBuilder exceptionDetail, Exception exception)
+        {
+            exceptionDetail.AppendLine(exception.Message);
+            exceptionDetail.AppendLine(exception.StackTrace);
+            while (exception.InnerException != null)
+            {
+                exception = exception.InnerException;
+                this.BuildException(exceptionDetail, exception);
+            }
         }
     }
 }
