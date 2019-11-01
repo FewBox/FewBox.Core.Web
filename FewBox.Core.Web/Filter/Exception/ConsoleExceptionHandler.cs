@@ -1,13 +1,19 @@
-﻿using FewBox.Core.Web.Dto;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using FewBox.Core.Web.Error;
 
 namespace FewBox.Core.Web.Filter
 {
-    public class ConsoleExceptionHandler : BaseExceptionHandler
+    public class ConsoleExceptionHandler : IExceptionHandler
     {
-        protected override void Handle(string name, string param)
+        private IExceptionProcessorService ExceptionProcessorService { get; set; }
+        public ConsoleExceptionHandler(IExceptionProcessorService exceptionProcessorService)
         {
+            this.ExceptionProcessorService = exceptionProcessorService;
+        }
+        public void Handle(string name, Exception exception)
+        {
+            string param = this.ExceptionProcessorService.DigInnerException(exception);
             Task.Run(() =>
             {
                 ConsoleColor consoleColor = Console.ForegroundColor;

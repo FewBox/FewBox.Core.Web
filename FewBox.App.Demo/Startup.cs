@@ -23,6 +23,7 @@ using Morcatko.AspNetCore.JsonMergePatch;
 using NSwag.SwaggerGeneration.Processors.Security;
 using NSwag;
 using FewBox.App.Demo.Stub;
+using FewBox.Core.Web.Error;
 
 namespace FewBox.App.Demo
 {
@@ -60,7 +61,8 @@ namespace FewBox.App.Demo
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
-            services.AddScoped<IAuthService, StubAuthenticationService>();
+            // services.AddScoped<IAuthService, StubAuthenticationService>();
+            services.AddScoped<IAuthService, RemoteAuthService>();
             services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
             // services.AddScoped<IOrmSession, MySqlSession>();
             services.AddScoped<IOrmSession, SQLiteSession>();
@@ -68,6 +70,7 @@ namespace FewBox.App.Demo
             services.AddScoped<IFBRepository, FBRepository>();
             services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
             services.AddScoped<ITraceHandler, ConsoleTraceHandler>();
+            services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>();
             //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();
             //services.AddScoped<ITraceHandler, ServiceTraceHandler>();
             services.AddHttpContextAccessor();

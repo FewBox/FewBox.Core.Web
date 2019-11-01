@@ -1,9 +1,7 @@
-﻿using FewBox.Core.Persistence.Orm;
-using FewBox.Core.Web.Dto;
+﻿using FewBox.Core.Web.Dto;
+using FewBox.Core.Web.Error;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
@@ -11,10 +9,12 @@ namespace FewBox.Core.Web.Filter
     public class ExceptionAsyncFilter : IAsyncActionFilter
     {
         private IExceptionHandler ExceptionHandler { get; set; }
+        private IExceptionProcessorService ExceptionProcessorService { get; set; }
 
-        public ExceptionAsyncFilter(IExceptionHandler exceptionHandler)
+        public ExceptionAsyncFilter(IExceptionHandler exceptionHandler, IExceptionProcessorService exceptionProcessorService)
         {
             this.ExceptionHandler = exceptionHandler;
+            this.ExceptionProcessorService = exceptionProcessorService;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -26,27 +26,11 @@ namespace FewBox.Core.Web.Filter
                 string action = context.ActionDescriptor.RouteValues["action"];
                 string name = $"{controller}-{action}";
                 this.ExceptionHandler.Handle(name, resultContext.Exception);
-                resultContext.Result = new ObjectResult(new ErrorResponseDto(this.GetExceptionDetail(resultContext.Exception)));
+                resultContext.Result = new ObjectResult(new ErrorResponseDto(this.ExceptionProcessorService.DigInnerException(resultContext.Exception)));
                 resultContext.ExceptionHandled = true;
             }
         }
 
-        private string GetExceptionDetail(Exception exception)
-        {
-            StringBuilder exceptionDetail = new StringBuilder();
-            this.BuildException(exceptionDetail, exception);
-            return exceptionDetail.ToString();
-        }
-
-        private void BuildException(StringBuilder exceptionDetail, Exception exception)
-        {
-            exceptionDetail.AppendLine(exception.Message);
-            exceptionDetail.AppendLine(exception.StackTrace);
-            while (exception.InnerException != null)
-            {
-                exception = exception.InnerException;
-                this.BuildException(exceptionDetail, exception);
-            }
-        }
+        
     }
 }
