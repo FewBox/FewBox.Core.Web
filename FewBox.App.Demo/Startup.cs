@@ -55,6 +55,8 @@ namespace FewBox.App.Demo
             services.AddSingleton(logConfig);
             var notificationConfig = this.Configuration.GetSection("NotificationConfig").Get<NotificationConfig>();
             services.AddSingleton(notificationConfig);
+            var healthyConfig = this.Configuration.GetSection("HealthyConfig").Get<HealthyConfig>();
+            services.AddSingleton(healthyConfig);
             services.AddScoped<ITokenService, JWTToken>();
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
