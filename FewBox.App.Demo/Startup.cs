@@ -72,6 +72,7 @@ namespace FewBox.App.Demo
             services.AddScoped<IFBRepository, FBRepository>();
             services.AddScoped<ILogHandler, ConsoleLogHandler>();
             services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
+            services.AddScoped<ITryCatchService, TryCatchService>();
             services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>();
             //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();
             //services.AddScoped<ITraceHandler, ServiceTraceHandler>();
