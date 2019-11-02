@@ -2,23 +2,22 @@
 using System.Threading.Tasks;
 using FewBox.Core.Web.Error;
 
-namespace FewBox.Core.Web.Filter
+namespace FewBox.Core.Web.Notification
 {
-    public class ConsoleExceptionHandler : IExceptionHandler
+    public class ConsoleNotificationHandler : INotificationHandler
     {
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
-        public ConsoleExceptionHandler(IExceptionProcessorService exceptionProcessorService)
+        public ConsoleNotificationHandler(IExceptionProcessorService exceptionProcessorService)
         {
             this.ExceptionProcessorService = exceptionProcessorService;
         }
-        public void Handle(string name, Exception exception)
+        public void Handle(string name, string param)
         {
-            string param = this.ExceptionProcessorService.DigInnerException(exception);
             Task.Run(() =>
             {
                 ConsoleColor consoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine($"[FewBox-Exception] {name} - {param}");
+                Console.WriteLine($"[FewBox-Alert] {name} - {param}");
                 Console.ForegroundColor = consoleColor;
             });
         }

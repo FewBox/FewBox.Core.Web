@@ -1,19 +1,24 @@
 ﻿using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Error;
+using FewBox.Core.Web.Log;
+using FewBox.Core.Web.Notification;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
 using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
 {
     public class ExceptionAsyncFilter : IAsyncActionFilter
     {
-        private IExceptionHandler ExceptionHandler { get; set; }
+        private ILogHandler LogHandler { get; set; }
+        private INotificationHandler NotificationHandler { get; set; }
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
 
-        public ExceptionAsyncFilter(IExceptionHandler exceptionHandler, IExceptionProcessorService exceptionProcessorService)
+        public ExceptionAsyncFilter(ILogHandler logHandler, INotificationHandler notificationHandler, IExceptionProcessorService exceptionProcessorService)
         {
-            this.ExceptionHandler = exceptionHandler;
+            this.LogHandler = logHandler;
+            this.NotificationHandler = notificationHandler;
             this.ExceptionProcessorService = exceptionProcessorService;
         }
 
@@ -24,13 +29,15 @@ namespace FewBox.Core.Web.Filter
             {
                 string controller = context.ActionDescriptor.RouteValues["controller"];
                 string action = context.ActionDescriptor.RouteValues["action"];
-                string name = $"{controller}-{action}";
-                this.ExceptionHandler.Handle(name, resultContext.Exception);
+                string name = $"[{Environment.MachineName}] {controller}-{action}";
+                string param = this.ExceptionProcessorService.DigInnerException(resultContext.Exception);
+                this.LogHandler.Handle(name, param);
+                this.NotificationHandler.Handle(name, param);
                 resultContext.Result = new ObjectResult(new ErrorResponseDto(this.ExceptionProcessorService.DigInnerException(resultContext.Exception)));
                 resultContext.ExceptionHandled = true;
             }
         }
 
-        
+
     }
 }

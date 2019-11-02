@@ -24,6 +24,8 @@ using NSwag.SwaggerGeneration.Processors.Security;
 using NSwag;
 using FewBox.App.Demo.Stub;
 using FewBox.Core.Web.Error;
+using FewBox.Core.Web.Log;
+using FewBox.Core.Web.Notification;
 
 namespace FewBox.App.Demo
 {
@@ -68,8 +70,8 @@ namespace FewBox.App.Demo
             services.AddScoped<IOrmSession, SQLiteSession>();
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             services.AddScoped<IFBRepository, FBRepository>();
-            services.AddScoped<IExceptionHandler, ConsoleExceptionHandler>();
-            services.AddScoped<ITraceHandler, ConsoleTraceHandler>();
+            services.AddScoped<ILogHandler, ConsoleLogHandler>();
+            services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
             services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>();
             //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();
             //services.AddScoped<ITraceHandler, ServiceTraceHandler>();

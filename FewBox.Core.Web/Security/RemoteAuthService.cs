@@ -13,13 +13,13 @@ namespace FewBox.Core.Web.Security
     {
         private IHttpContextAccessor HttpContextAccessor { get; set; }
         private SecurityConfig SecurityConfig { get; set; }
-        private IExceptionProcessorService ExceptionProcessorService { get; set; }
+        private ITryCatchService TryCatchService { get; set; }
 
-        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, SecurityConfig securityConfig, IExceptionProcessorService exceptionProcessorService)
+        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, SecurityConfig securityConfig, ITryCatchService tryCatchService)
         {
             this.HttpContextAccessor = httpContextAccessor;
             this.SecurityConfig = securityConfig;
-            this.ExceptionProcessorService = exceptionProcessorService;
+            this.TryCatchService = tryCatchService;
         }
 
         public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
@@ -28,7 +28,7 @@ namespace FewBox.Core.Web.Security
             PayloadResponseDto<IList<string>> response = null;
             if (this.HttpContextAccessor.HttpContext.Request.Headers.Keys.Contains("Authorization"))
             {
-                this.ExceptionProcessorService.TryCatchInNotification(() =>
+                this.TryCatchService.TryCatch(() =>
                 {
                     response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}",
                     this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"],
@@ -38,7 +38,7 @@ namespace FewBox.Core.Web.Security
             }
             else
             {
-                this.ExceptionProcessorService.TryCatchInNotification(() =>
+                this.TryCatchService.TryCatch(() =>
                 {
                     response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>($"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}",
                     headers);

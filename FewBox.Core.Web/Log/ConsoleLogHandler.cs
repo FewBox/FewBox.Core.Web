@@ -1,17 +1,17 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace FewBox.Core.Web.Filter
+namespace FewBox.Core.Web.Log
 {
-    public class ConsoleTraceHandler : BaseTraceHandler
+    public class ConsoleLogHandler : ILogHandler
     {
-        protected override void Trace(string name, string param)
+        public void Handle(string name, string param)
         {
             Task.Run(() =>
             {
                 ConsoleColor consoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine($"[FewBox-Trace] {name} - {param}");
+                Console.WriteLine($"[FewBox-Log] {name} - {param}");
                 Console.ForegroundColor = consoleColor;
             });
         }

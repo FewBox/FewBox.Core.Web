@@ -1,4 +1,5 @@
 ﻿using FewBox.Core.Utility.Formatter;
+using FewBox.Core.Web.Log;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -9,11 +10,11 @@ namespace FewBox.Core.Web.Filter
 {
     public class TraceAsyncFilter : IAsyncActionFilter
     {
-        private ITraceHandler TraceHandler { get; set; }
+        private ILogHandler LogHandler { get; set; }
 
-        public TraceAsyncFilter(ITraceHandler traceHandler)
+        public TraceAsyncFilter(ILogHandler logHandler)
         {
-            this.TraceHandler = traceHandler;
+            this.LogHandler = logHandler;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -26,9 +27,9 @@ namespace FewBox.Core.Web.Filter
                 foreach (string key in context.ActionArguments.Keys)
                 {
                     var argument = context.ActionArguments[key];
-                    string name = $"{controller}-{action}-{argument.GetType()}";
+                    string name = $"[{Environment.MachineName}] {controller}-{action}-{argument.GetType()}";
                     string prama = JsonUtility.Serialize(argument);
-                    this.TraceHandler.Trace(name, prama);
+                    this.LogHandler.Handle(name, prama);
                 }
             }
             var resultContext = await next();
