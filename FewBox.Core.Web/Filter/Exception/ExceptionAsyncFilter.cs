@@ -31,7 +31,7 @@ namespace FewBox.Core.Web.Filter
                 string action = context.ActionDescriptor.RouteValues["action"];
                 string name = $"[{Environment.MachineName}] {controller}-{action}";
                 string param = this.ExceptionProcessorService.DigInnerException(resultContext.Exception);
-                this.LogHandler.Handle(name, param);
+                this.LogHandler.HandleException(name, param);
                 this.NotificationHandler.Handle(name, param);
                 resultContext.Result = new ObjectResult(new ErrorResponseDto(this.ExceptionProcessorService.DigInnerException(resultContext.Exception)));
                 resultContext.ExceptionHandled = true;

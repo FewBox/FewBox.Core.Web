@@ -28,6 +28,26 @@ namespace FewBox.Core.Web.Log
                         Headers = new List<Header> { },
                         Body = new LogRequestDto
                         {
+                            Type = LogTypeDto.Audit,
+                            Name = name,
+                            Param = param
+                        }
+                    });
+                });
+            });
+        }
+
+        public void HandleException(string name, string param)
+        {
+            Task.Run(() =>
+            {
+                this.TryCatchService.TryCatch(() =>
+                {
+                    RestfulUtility.Post<LogRequestDto, LogResponseDto>($"{this.LogConfig.Protocol}://{this.LogConfig.Host}:{this.LogConfig.Port}/api/logs", new Package<LogRequestDto>
+                    {
+                        Headers = new List<Header> { },
+                        Body = new LogRequestDto
+                        {
                             Type = LogTypeDto.Exception,
                             Name = name,
                             Param = param
