@@ -23,10 +23,10 @@ namespace FewBox.Core.Web.Notification
             {
                 this.TryCatchService.TryCatchWithoutNotification(() =>
                 {
-                    RestfulUtility.Post<AlertRequestDto, AlertResponseDto>($"{this.NotificationConfig.Protocol}://{this.NotificationConfig.Host}:{this.NotificationConfig.Port}/api/notification", new Package<AlertRequestDto>
+                    RestfulUtility.Post<NotificationRequestDto, NotificationResponseDto>($"{this.NotificationConfig.Protocol}://{this.NotificationConfig.Host}:{this.NotificationConfig.Port}/api/notification", new Package<NotificationRequestDto>
                     {
                         Headers = new List<Header> { },
-                        Body = new AlertRequestDto
+                        Body = new NotificationRequestDto
                         {
                             Name = name,
                             Param = param

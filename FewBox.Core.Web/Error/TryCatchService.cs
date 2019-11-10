@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using FewBox.Core.Utility.Net;
-using FewBox.Core.Web.Config;
-using FewBox.Core.Web.Dto;
+using FewBox.Core.Web.Notification;
 
 namespace FewBox.Core.Web.Error
 {
     public class TryCatchService : ITryCatchService
     {
-        private NotificationConfig NotificationConfig { get; set; }
+        private INotificationHandler NotificationHandler { get; set; }
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
-        public TryCatchService(NotificationConfig notificationConfig, IExceptionProcessorService exceptionProcessorService)
+        public TryCatchService(INotificationHandler notificationHandler, IExceptionProcessorService exceptionProcessorService)
         {
-            this.NotificationConfig = notificationConfig;
+            this.NotificationHandler = notificationHandler;
             this.ExceptionProcessorService = exceptionProcessorService;
         }
 
@@ -27,16 +25,9 @@ namespace FewBox.Core.Web.Error
             {
                 TryCatchWithoutNotification(() =>
                 {
-                    string exceptionDetail = this.ExceptionProcessorService.DigInnerException(exception);
-                    RestfulUtility.Post<AlertRequestDto, AlertResponseDto>($"{this.NotificationConfig.Protocol}://{this.NotificationConfig.Host}:{this.NotificationConfig.Port}/api/notification", new Package<AlertRequestDto>
-                    {
-                        Headers = new List<Header> { },
-                        Body = new AlertRequestDto
-                        {
-                            Name = $"[FewBox-Remote TryCatch In Notification]",
-                            Param = exceptionDetail
-                        }
-                    });
+                    string name = $"[FewBox-Remote TryCatch In Notification]";
+                    string param = this.ExceptionProcessorService.DigInnerException(exception);
+                    this.NotificationHandler.Handle(name, param);
                 });
             }
         }
