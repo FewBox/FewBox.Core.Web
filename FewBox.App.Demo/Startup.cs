@@ -71,7 +71,7 @@ namespace FewBox.App.Demo
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             services.AddScoped<IFBRepository, FBRepository>();
             services.AddScoped<ILogHandler, ConsoleLogHandler>();
-            services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
+            services.AddScoped<INotificationHandler, ServiceNotificationHandler>();
             services.AddScoped<ITryCatchService, TryCatchService>();
             services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>();
             //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();

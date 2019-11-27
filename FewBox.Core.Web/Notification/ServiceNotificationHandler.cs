@@ -12,16 +12,17 @@ namespace FewBox.Core.Web.Notification
     {
         private NotificationConfig NotificationConfig { get; set; }
         private ITryCatchService TryCatchService { get; set; }
-        public ServiceNotificationHandler(NotificationConfig notificationConfig, ITryCatchService tryCatchService)
+        private IExceptionProcessorService ExceptionProcessorService { get; set; }
+        public ServiceNotificationHandler(NotificationConfig notificationConfig, IExceptionProcessorService exceptionProcessorService)
         {
             this.NotificationConfig = notificationConfig;
-            this.TryCatchService = tryCatchService;
+            this.ExceptionProcessorService = exceptionProcessorService;
         }
         public void Handle(string name, string param)
         {
             Task.Run(() =>
             {
-                this.TryCatchService.TryCatchWithoutNotification(() =>
+                try
                 {
                     RestfulUtility.Post<NotificationRequestDto, NotificationResponseDto>($"{this.NotificationConfig.Protocol}://{this.NotificationConfig.Host}:{this.NotificationConfig.Port}/api/notification", new Package<NotificationRequestDto>
                     {
@@ -32,7 +33,15 @@ namespace FewBox.Core.Web.Notification
                             Param = param
                         }
                     });
-                });
+                }
+                catch (Exception exception)
+                {
+                    ConsoleColor consoleColor = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    string exceptionDetail = this.ExceptionProcessorService.DigInnerException(exception);
+                    Console.WriteLine($"[FewBox-{Environment.MachineName} Notification Exception] {exceptionDetail}");
+                    Console.ForegroundColor = consoleColor;
+                }
             });
         }
     }
