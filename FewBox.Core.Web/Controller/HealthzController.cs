@@ -8,11 +8,11 @@ namespace FewBox.Core.Web.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HealthyController : ControllerBase
+    public class HealthzController : ControllerBase
     {
         private HealthyConfig HealthyConfig { get; set; }
 
-        public HealthyController(HealthyConfig healthyConfig)
+        public HealthzController(HealthyConfig healthyConfig)
         {
             this.HealthyConfig = healthyConfig;
         }
