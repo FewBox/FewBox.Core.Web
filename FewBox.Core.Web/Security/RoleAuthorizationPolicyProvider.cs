@@ -12,9 +12,19 @@ namespace FewBox.Core.Web.Security
             return Task.FromResult(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
         }
 
+        public Task<AuthorizationPolicy> GetFallbackPolicyAsync()
+        {
+            var result = new AuthorizationPolicyBuilder();
+            result = result.RequireAssertion(context =>
+            {
+                return true;
+            });
+            return Task.FromResult(result.Build());
+        }
+
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-            if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase)&&
+            if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase) &&
             Enum.TryParse<RolePolicyType>(policyName.Substring(POLICY_PREFIX.Length), out RolePolicyType rolePolicyType))
             {
                 var policy = new AuthorizationPolicyBuilder();

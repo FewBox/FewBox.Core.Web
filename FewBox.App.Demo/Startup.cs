@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using FewBox.Core.Web.Security;
 using FewBox.Core.Web.Token;
@@ -20,12 +19,12 @@ using FewBox.Core.Web.Filter;
 using Dapper;
 using AutoMapper;
 using Morcatko.AspNetCore.JsonMergePatch;
-using NSwag.SwaggerGeneration.Processors.Security;
 using NSwag;
-using FewBox.App.Demo.Stub;
 using FewBox.Core.Web.Error;
 using FewBox.Core.Web.Log;
 using FewBox.Core.Web.Notification;
+using NSwag.Generation.Processors.Security;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace FewBox.App.Demo
 {
@@ -43,13 +42,14 @@ namespace FewBox.App.Demo
         {
             services.AddScoped<ITokenService, JWTToken>();
             SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler());
-            services.AddAutoMapper();
+            services.AddAutoMapper(typeof(Startup));
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.Filters.Add<ExceptionAsyncFilter>();
                 options.Filters.Add<TransactionAsyncFilter>();
                 options.Filters.Add<TraceAsyncFilter>();
-            }).AddJsonMergePatch().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            }).AddJsonMergePatch().SetCompatibilityVersion(CompatibilityVersion.Latest);
             var jwtConfig = this.Configuration.GetSection("JWTConfig").Get<JWTConfig>();
             services.AddSingleton(jwtConfig);
             var securityConfig = this.Configuration.GetSection("SecurityConfig").Get<SecurityConfig>();
@@ -77,7 +77,7 @@ namespace FewBox.App.Demo
             //services.AddScoped<IExceptionHandler, ServiceExceptionHandler>();
             //services.AddScoped<ITraceHandler, ServiceTraceHandler>();
             services.AddHttpContextAccessor();
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>(); 
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -100,13 +100,13 @@ namespace FewBox.App.Demo
                     document.Info.Title = "FewBox demo Api";
                     document.Info.Description = "FewBox shipping, for more information please visit the 'https://fewbox.com'";
                     document.Info.TermsOfService = "https://fewbox.com/terms";
-                    document.Info.Contact = new NSwag.SwaggerContact
+                    document.Info.Contact = new OpenApiContact
                     {
                         Name = "FewBox",
                         Email = "support@fewbox.com",
                         Url = "https://fewbox.com/support"
                     };
-                    document.Info.License = new NSwag.SwaggerLicense
+                    document.Info.License = new OpenApiLicense
                     {
                         Name = "Use under license",
                         Url = "https://raw.githubusercontent.com/FewBox/FewBox.Service.Shipping/master/LICENSE"
@@ -114,21 +114,21 @@ namespace FewBox.App.Demo
                 };
                 config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT"));
                 config.DocumentProcessors.Add(
-                    new SecurityDefinitionAppender("JWT", new List<string> { "API" }, new SwaggerSecurityScheme
+                    new SecurityDefinitionAppender("JWT", new OpenApiSecurityScheme
                     {
-                        Type = SwaggerSecuritySchemeType.ApiKey,
+                        Type = OpenApiSecuritySchemeType.ApiKey,
                         Name = "Authorization",
                         Description = "Bearer [Token]",
-                        In = SwaggerSecurityApiKeyLocation.Header
+                        In = OpenApiSecurityApiKeyLocation.Header
                     })
                 );
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.EnvironmentName == "development")
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -139,9 +139,9 @@ namespace FewBox.App.Demo
 
             app.UseAuthentication();
             app.UseHttpsRedirection();
-            app.UseSwagger();
+            app.UseOpenApi();
             app.UseStaticFiles();
-            if (env.IsDevelopment() || env.IsStaging())
+            if (env.EnvironmentName == "development" || env.EnvironmentName == "staging")
             {
                 app.UseSwaggerUi3();
             }

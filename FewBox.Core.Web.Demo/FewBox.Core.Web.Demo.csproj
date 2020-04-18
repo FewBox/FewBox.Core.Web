@@ -5,13 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="FewBox.Core.Persistence" Version="1.0.38" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.4.2" />
+    <PackageReference Include="FewBox.Core.Utility" Version="1.0.31" />
   </ItemGroup>
 
   <ItemGroup>
