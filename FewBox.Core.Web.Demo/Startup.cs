@@ -1,37 +1,33 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Utility.Formatter;
 using FewBox.Core.Utility.Net;
-/*using FewBox.Core.Web.Config;
+using FewBox.Core.Web.Config;
+using FewBox.Core.Web.Demo.Repositories;
 using FewBox.Core.Web.Error;
 using FewBox.Core.Web.Filter;
-using FewBox.Core.Web.Log;
 using FewBox.Core.Web.Notification;
 using FewBox.Core.Web.Orm;
 using FewBox.Core.Web.Security;
+using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Token;
-using Microsoft.AspNetCore.Authentication.JwtBearer;*/
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-//using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-//using NSwag;
-//using NSwag.Generation.Processors.Security;
+using Microsoft.IdentityModel.Tokens;
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using Sentry.Extensibility;
 
 namespace FewBox.Core.Web.Demo
 {
@@ -50,7 +46,7 @@ namespace FewBox.Core.Web.Demo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            /*SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler()); // Note: SQLite
+            SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler()); // Note: SQLite
             RestfulUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
             RestfulUtility.IsLogging = true; // Todo: Need to remove.
             JsonUtility.IsCamelCase = true; // Is camel case.
@@ -60,10 +56,10 @@ namespace FewBox.Core.Web.Demo
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
-                if (this.Environment.EnvironmentName != "Test")
+                /*if (this.Environment.EnvironmentName != "Test")
                 {
-                    options.Filters.Add<ExceptionAsyncFilter>(); // Capture the exception.
-                }
+                    options.Filters.Add<ExceptionAsyncFilter>(); // Capture the exception. // Obsolete
+                }*/
                 if (this.Environment.IsDevelopment())
                 {
                     options.Filters.Add(new AllowAnonymousFilter()); // Ignore the authorization.
@@ -115,11 +111,9 @@ namespace FewBox.Core.Web.Demo
             services.AddScoped<IOrmSession, SQLiteSession>(); // Note: SQLite
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             // Used for Application.
-
+            services.AddScoped<IFewBoxRepository, FewBoxRepository>();
             // Used for Exception&Log AOP.
-            // services.AddScoped<ILogHandler, ConsoleLogHandler>();
             // services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
-            services.AddScoped<ILogHandler, ServiceLogHandler>();
             services.AddScoped<INotificationHandler, ServiceNotificationHandler>();
             services.AddScoped<ITryCatchService, TryCatchService>();
             // Used for IHttpContextAccessor&IActionContextAccessor context.
@@ -127,7 +121,11 @@ namespace FewBox.Core.Web.Demo
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // Used for JWT.
             services.AddScoped<ITokenService, JWTToken>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -172,13 +170,16 @@ namespace FewBox.Core.Web.Demo
                         In = OpenApiSecurityApiKeyLocation.Header
                     })
                 );
-            });*/
+            });
+            // Used for Sentry
+            services.AddTransient<ISentryEventProcessor, SentryEventProcessor>();
+            services.AddSingleton<ISentryEventExceptionProcessor, SentryEventExceptionProcessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            /*app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
             app.UseOpenApi();
@@ -187,7 +188,7 @@ namespace FewBox.Core.Web.Demo
 
             if (env.IsDevelopment())
             {
-                //app.UseSwaggerUi3();
+                app.UseSwaggerUi3();
                 app.UseDeveloperExceptionPage();
             }
             if (env.IsStaging())
@@ -200,21 +201,6 @@ namespace FewBox.Core.Web.Demo
                 app.UseReDoc();
                 app.UseHsts();
             }
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });*/
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

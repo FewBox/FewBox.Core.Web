@@ -1,6 +1,6 @@
 using AutoMapper;
 using FewBox.Core.Web.Demo.Dtos;
-using FewBox.Core.Web.Demo.Repositories;
+using FBR = FewBox.Core.Web.Demo.Repositories;
 
 namespace FewBox.Core.Web.Demo.AutoMapperProfiles
 {
@@ -8,8 +8,8 @@ namespace FewBox.Core.Web.Demo.AutoMapperProfiles
     {
         public MapperProfiles()
         {
-            CreateMap<FB, FBDto>();
-            CreateMap<FBPersistenceDto, FB>();
+            CreateMap<FBR.FewBox, FewBoxDto>();
+            CreateMap<PersistenceFewBoxDto, FBR.FewBox>();
         }
     }
 }

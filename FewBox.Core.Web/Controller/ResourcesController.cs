@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.JsonPatch;
-using Morcatko.AspNetCore.JsonMergePatch;
 
 namespace FewBox.Core.Web.Controller
 {
@@ -90,20 +89,6 @@ namespace FewBox.Core.Web.Controller
         {
             E theEntity = this.Repository.FindOne(id);
             jsonPatchEntity.ApplyTo(theEntity);
-            int effect = this.Repository.Update(theEntity);
-            return new PayloadResponseDto<int>
-            {
-                Payload = effect
-            };
-        }
-
-        [HttpPatch("merge/{id}")]
-        [Consumes(JsonMergePatchDocument.ContentType)]
-        [Transaction]
-        public virtual MetaResponseDto Patch(I id, [FromBody]JsonMergePatchDocument<E> jsonMergePatchEntity)
-        {
-            E theEntity = this.Repository.FindOne(id);
-            jsonMergePatchEntity.ApplyTo(theEntity);
             int effect = this.Repository.Update(theEntity);
             return new PayloadResponseDto<int>
             {

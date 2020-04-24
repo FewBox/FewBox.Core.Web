@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace FewBox.App.Demo.Dtos
+namespace FewBox.Core.Web.Demo.Dtos
 {
-    public class FBDto
+    public class PersistenceFewBoxDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

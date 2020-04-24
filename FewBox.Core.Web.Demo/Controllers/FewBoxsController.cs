@@ -9,9 +9,9 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FBsController : ResourcesController<IFBRepository, FB, Guid, FBDto, FBPersistenceDto>
+    public class FewBoxsController : ResourcesController<IFewBoxRepository, Repositories.FewBox, Guid, FewBoxDto, PersistenceFewBoxDto>
     {
-        public FBsController(IFBRepository fBRepository, IMapper mapper) : base(fBRepository, mapper)
+        public FewBoxsController(IFewBoxRepository fewBoxRepository, IMapper mapper) : base(fewBoxRepository, mapper)
         {
         }
     }

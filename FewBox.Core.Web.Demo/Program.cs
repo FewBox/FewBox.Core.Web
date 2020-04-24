@@ -18,8 +18,20 @@ namespace FewBox.Core.Web.Demo
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseSentry(options =>
+                    {
+                        options.BeforeSend = @event =>
+                        {
+                            return @event;
+                        };
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

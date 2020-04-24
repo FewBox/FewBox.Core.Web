@@ -17,11 +17,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="FewBox.Core.Persistence" Version="1.0.38" />
     <PackageReference Include="FewBox.Core.Utility" Version="1.0.31" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Morcatko.AspNetCore.JsonMergePatch" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
+    <PackageReference Include="Sentry.AspNetCore" Version="2.1.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.3" />
   </ItemGroup>

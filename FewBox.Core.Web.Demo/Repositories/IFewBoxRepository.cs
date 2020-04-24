@@ -1,10 +1,9 @@
-using System;
+﻿using System;
 using FewBox.Core.Persistence.Orm;
 
 namespace FewBox.Core.Web.Demo.Repositories
 {
-    public class FB : Entity<Guid>
+    public interface IFewBoxRepository : IBaseRepository<FewBox, Guid>
     {
-        public string Name { get; set; }
     }
 }

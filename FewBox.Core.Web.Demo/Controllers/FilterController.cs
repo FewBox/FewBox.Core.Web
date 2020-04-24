@@ -1,34 +1,34 @@
-﻿using System;
-using FewBox.App.Demo.Repositories;
+using System;
+using FewBox.Core.Web.Demo.Repositories;
+using FBR = FewBox.Core.Web.Demo.Repositories;
 using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FewBox.App.Demo.Controllers
+namespace FewBox.Core.Web.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class FilterController : ControllerBase
     {
-        private IFBRepository FBRepository { get; set; }
+        private IFewBoxRepository FewBoxRepository { get; set; }
 
-        public FilterController(IFBRepository fbRepository)
+        public FilterController(IFewBoxRepository fewBoxRepository)
         {
-            this.FBRepository = fbRepository;
+            this.FewBoxRepository = fewBoxRepository;
         }
 
         [HttpPost("transaction")]
         [Transaction]
         public void TestTransaction()
         {
-            this.FBRepository.Save(new FB { Name = "FewBox" });
+            this.FewBoxRepository.Save(new FBR.FewBox { Name = "FewBox" });
         }
 
         [HttpPost("trace")]
         [Trace]
         public PayloadResponseDto<string> TestTrace(TraceInfo traceInfo)
         {
-            Console.WriteLine("TestTrace");
             return new PayloadResponseDto<string>{
                 Payload = "TestTrace"
             };
