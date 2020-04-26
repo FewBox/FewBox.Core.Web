@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -45,7 +46,7 @@ namespace FewBox.Core.Web.Demo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(); // AddNewtonsoftJson is for JsonPatchDocument.
             SqlMapper.AddTypeHandler(new SQLiteGuidTypeHandler()); // Note: SQLite
             RestfulUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
             RestfulUtility.IsLogging = true; // Todo: Need to remove.
@@ -56,10 +57,6 @@ namespace FewBox.Core.Web.Demo
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
-                /*if (this.Environment.EnvironmentName != "Test")
-                {
-                    options.Filters.Add<ExceptionAsyncFilter>(); // Capture the exception. // Obsolete
-                }*/
                 if (this.Environment.IsDevelopment())
                 {
                     options.Filters.Add(new AllowAnonymousFilter()); // Ignore the authorization.

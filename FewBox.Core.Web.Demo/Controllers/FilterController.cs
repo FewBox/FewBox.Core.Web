@@ -26,11 +26,17 @@ namespace FewBox.Core.Web.Controllers
         }
 
         [HttpPost("trace")]
-        [Trace]
         public PayloadResponseDto<string> TestTrace(TraceInfo traceInfo)
         {
             return new PayloadResponseDto<string>{
-                Payload = "TestTrace"
+                Payload = @"Change appsettings.Development.json LogLevel to trace.
+                Trace=0
+                Debug=1
+                Information=2
+                Warnning=3
+                Error=4
+                Critical=5,
+                None=6"
             };
         }
 

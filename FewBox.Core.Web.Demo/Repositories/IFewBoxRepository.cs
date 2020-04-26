@@ -1,9 +1,8 @@
-﻿using System;
-using FewBox.Core.Persistence.Orm;
+﻿using FewBox.Core.Persistence.Orm;
 
 namespace FewBox.Core.Web.Demo.Repositories
 {
-    public interface IFewBoxRepository : IBaseRepository<FewBox, Guid>
+    public interface IFewBoxRepository : IRepository<FewBox>
     {
     }
 }

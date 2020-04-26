@@ -24,8 +24,8 @@ namespace FewBox.Core.Web.Controller
             {
                 Payload = new HealthyDto
                 {
-                    MachineName = Environment.MachineName,
                     Version = this.HealthyConfig.Version,
+                    MachineName = Environment.MachineName,
                     AssemblyVersion = Assembly.GetEntryAssembly().GetName().Version.ToString(),
                     AssemblyFileVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version
                 }

@@ -5,22 +5,28 @@ using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Token
 {
     public class JWTToken : TokenService
     {
+        ILogger<TokenService> Logger { get; set; }
+        public JWTToken(ILogger<JWTToken> logger)
+        {
+            this.Logger = logger;
+        }
         public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userInfo.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token;
-            if(expiredTime == TimeSpan.Zero)
+            if (expiredTime == TimeSpan.Zero)
             {
                 token = new JwtSecurityToken(
                     userInfo.Issuer,
                     userInfo.Issuer,
-                    userInfo.Claims.Union( new List<Claim>{ 
+                    userInfo.Claims.Union(new List<Claim>{
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
                         new Claim(TokenClaims.Issuer, userInfo.Issuer)
                     }),
@@ -31,7 +37,7 @@ namespace FewBox.Core.Web.Token
                 token = new JwtSecurityToken(
                     userInfo.Issuer,
                     userInfo.Issuer,
-                    userInfo.Claims.Union( new List<Claim>{ 
+                    userInfo.Claims.Union(new List<Claim>{
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
                         new Claim(TokenClaims.Issuer, userInfo.Issuer)
                     }),
@@ -52,7 +58,8 @@ namespace FewBox.Core.Web.Token
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-            return new UserProfile{
+            return new UserProfile
+            {
                 Id = this.GetClaimValue(jsonToken.Claims, TokenClaims.Id),
                 Issuer = this.GetClaimValue(jsonToken.Claims, TokenClaims.Issuer),
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),
@@ -65,7 +72,8 @@ namespace FewBox.Core.Web.Token
         {
             var handler = new JwtSecurityTokenHandler();
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters {
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
+            {
                 // Validation states:
                 ValidateLifetime = true,
                 ValidateAudience = false,
@@ -82,9 +90,9 @@ namespace FewBox.Core.Web.Token
                 SecurityToken securityToken;
                 claimsPricipal = handler.ValidateToken(token, tokenValidationParameters, out securityToken);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
-                Console.WriteLine(exception.Message);
+                this.Logger.LogError(exception.Message);
             }
             return claimsPricipal != null;
         }
@@ -92,7 +100,7 @@ namespace FewBox.Core.Web.Token
         {
             string value = String.Empty;
             var claim = claims.FirstOrDefault(c => c.Type == name);
-            if(claim != null)
+            if (claim != null)
             {
                 value = claim.Value;
             }
@@ -101,7 +109,7 @@ namespace FewBox.Core.Web.Token
 
         private IList<string> GetClaimValues(IEnumerable<Claim> claims, string name)
         {
-            return claims.Where(c => c.Type== name).Select(c => c.Value).ToList();
+            return claims.Where(c => c.Type == name).Select(c => c.Value).ToList();
         }
     }
 }

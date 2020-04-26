@@ -1,10 +1,8 @@
 ﻿using FewBox.Core.Utility.Formatter;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FewBox.Core.Web.Filter
@@ -20,8 +18,7 @@ namespace FewBox.Core.Web.Filter
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            int count = (((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo).GetCustomAttributes(false).Where(attribute => attribute is TraceAttribute).Count();
-            if (count > 0)
+            if (context.ActionArguments.Count > 0)
             {
                 string controller = context.ActionDescriptor.RouteValues["controller"];
                 string action = context.ActionDescriptor.RouteValues["action"];
@@ -29,10 +26,11 @@ namespace FewBox.Core.Web.Filter
                 foreach (string key in context.ActionArguments.Keys)
                 {
                     var argument = context.ActionArguments[key];
-                    string argumentString = $"[{controller}-{action}-{argument.GetType()}] {JsonUtility.Serialize(argument)}";
+                    string argumentString = $"{JsonUtility.Serialize(argument)}";
                     arguments.Add(argumentString);
                 }
-                this.Logger.LogTrace($"[{controller}-{action}] {String.Join(',', arguments)}");
+                //this.Logger.LogTrace($"[{controller}-{action}] {String.Join(',', arguments)}");
+                this.Logger.LogTrace($"{String.Join(',', arguments)}");
             }
             var resultContext = await next();
         }

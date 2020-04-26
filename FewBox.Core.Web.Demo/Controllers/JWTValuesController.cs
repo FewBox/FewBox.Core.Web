@@ -45,14 +45,14 @@ namespace FewBox.Core.Web.Controllers
         }
 
         [HttpGet("controllerandaction")]
-        [Authorize(Policy = "JWTRole_ControllerActionWithLog")]
+        [Authorize(Policy = "JWTRole_ControllerAction")]
         public IList<Value> GetByWithHeader()
         {
             return this.Values;
         }
 
         [HttpGet("method")]
-        [Authorize(Policy = "JWTRole_MethodWithLog")]
+        [Authorize(Policy = "JWTRole_Method")]
         public IList<Value> GetByWithCookie()
         {
             return this.Values;

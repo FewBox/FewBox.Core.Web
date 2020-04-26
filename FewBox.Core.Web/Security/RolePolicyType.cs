@@ -3,8 +3,6 @@
     public enum RolePolicyType
     {
         ControllerAction,
-        Method,
-        ControllerActionWithLog,
-        MethodWithLog
+        Method
     }
 }

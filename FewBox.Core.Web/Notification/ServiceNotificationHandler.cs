@@ -2,6 +2,7 @@
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Error;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +14,12 @@ namespace FewBox.Core.Web.Notification
         private NotificationConfig NotificationConfig { get; set; }
         private ITryCatchService TryCatchService { get; set; }
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
-        public ServiceNotificationHandler(NotificationConfig notificationConfig, IExceptionProcessorService exceptionProcessorService)
+        private ILogger<ServiceNotificationHandler> Logger { get; set; }
+        public ServiceNotificationHandler(NotificationConfig notificationConfig, IExceptionProcessorService exceptionProcessorService, ILogger<ServiceNotificationHandler> logger)
         {
             this.NotificationConfig = notificationConfig;
             this.ExceptionProcessorService = exceptionProcessorService;
+            this.Logger = logger;
         }
         public void Handle(string name, string param)
         {
@@ -36,11 +39,8 @@ namespace FewBox.Core.Web.Notification
                 }
                 catch (Exception exception)
                 {
-                    ConsoleColor consoleColor = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.Blue;
                     string exceptionDetail = this.ExceptionProcessorService.DigInnerException(exception);
-                    Console.WriteLine($"[FewBox-{Environment.MachineName} Notification Exception] {exceptionDetail}");
-                    Console.ForegroundColor = consoleColor;
+                    this.Logger.LogError(exceptionDetail);
                 }
             });
         }

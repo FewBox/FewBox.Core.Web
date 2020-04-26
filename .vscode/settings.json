@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "${workspaceFolder}\\FewBox.Core.Web.Demo/demo.sqlite3",
+            "dialect": "SQLite",
+            "name": "Web"
+        },
+        {
+            "database": ".\\FewBox.Core.Web.Demo/demo.sqlite3",
+            "dialect": "SQLite",
+            "isActive": true,
+            "isConnected": true,
+            "name": "Web"
+        }
+    ]
+}

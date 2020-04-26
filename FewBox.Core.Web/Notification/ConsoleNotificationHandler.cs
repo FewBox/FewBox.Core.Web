@@ -1,24 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
-using FewBox.Core.Web.Error;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Notification
 {
     public class ConsoleNotificationHandler : INotificationHandler
     {
-        private IExceptionProcessorService ExceptionProcessorService { get; set; }
-        public ConsoleNotificationHandler(IExceptionProcessorService exceptionProcessorService)
+        private ILogger<ConsoleNotificationHandler> Logger { get; set; }
+        public ConsoleNotificationHandler(ILogger<ConsoleNotificationHandler> logger)
         {
-            this.ExceptionProcessorService = exceptionProcessorService;
+            this.Logger = logger;
         }
         public void Handle(string name, string param)
         {
             Task.Run(() =>
             {
-                ConsoleColor consoleColor = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine($"[FewBox-Alert] {name} - {param}");
-                Console.ForegroundColor = consoleColor;
+                this.Logger.LogInformation($"[FewBox-Alert] {name} - {param}");
             });
         }
     }

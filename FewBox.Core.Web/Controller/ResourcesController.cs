@@ -11,7 +11,7 @@ namespace FewBox.Core.Web.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class ResourcesController<RI, E, I, D, PD> : MapperController where E : Entity<I> where RI : IBaseRepository<E, I>
+    public abstract class ResourcesController<RI, E, D, PD> : MapperController where E : Entity where RI : IRepository<E>
     {
         protected RI Repository { get; set; }
         protected ResourcesController(RI repository, IMapper mapper) : base(mapper)
@@ -51,7 +51,7 @@ namespace FewBox.Core.Web.Controller
         }
 
         [HttpGet("{id}")]
-        public PayloadResponseDto<D> Get(I id)
+        public PayloadResponseDto<D> Get(Guid id)
         {
             return new PayloadResponseDto<D>
             {
@@ -61,10 +61,10 @@ namespace FewBox.Core.Web.Controller
 
         [HttpPost]
         [Transaction]
-        public virtual PayloadResponseDto<I> Post([FromBody]PD persistenceDto)
+        public virtual PayloadResponseDto<Guid> Post([FromBody]PD persistenceDto)
         {
-            I id = this.Repository.Save(this.Mapper.Map<PD, E>(persistenceDto));
-            return new PayloadResponseDto<I>
+            Guid id = this.Repository.Save(this.Mapper.Map<PD, E>(persistenceDto));
+            return new PayloadResponseDto<Guid>
             {
                 Payload = id
             };
@@ -72,7 +72,7 @@ namespace FewBox.Core.Web.Controller
 
         [HttpPut("{id}")]
         [Transaction]
-        public virtual PayloadResponseDto<int> Put(I id, [FromBody]PD persistenceDto)
+        public virtual PayloadResponseDto<int> Put(Guid id, [FromBody]PD persistenceDto)
         {
             E entity = this.Mapper.Map<PD, E>(persistenceDto);
             entity.Id = id;
@@ -85,8 +85,13 @@ namespace FewBox.Core.Web.Controller
 
         [HttpPatch("{id}")]
         [Transaction]
-        public virtual MetaResponseDto Patch(I id, [FromBody]JsonPatchDocument<E> jsonPatchEntity)
+        public virtual MetaResponseDto Patch(Guid id, [FromBody]JsonPatchDocument<E> jsonPatchEntity)
         {
+            /*
+            [
+                { "op": "replace", "path": "/Name", "value": "FewBox & Landpy" },
+            ]
+            */
             E theEntity = this.Repository.FindOne(id);
             jsonPatchEntity.ApplyTo(theEntity);
             int effect = this.Repository.Update(theEntity);
@@ -98,7 +103,7 @@ namespace FewBox.Core.Web.Controller
 
         [HttpDelete("{id}")]
         [Transaction]
-        public virtual PayloadResponseDto<int> Delete(I id)
+        public virtual PayloadResponseDto<int> Delete(Guid id)
         {
             int effect = this.Repository.Recycle(id);
             return new PayloadResponseDto<int>

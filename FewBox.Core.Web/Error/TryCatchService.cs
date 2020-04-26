@@ -1,5 +1,6 @@
 ﻿using System;
 using FewBox.Core.Web.Notification;
+using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Error
 {
@@ -7,10 +8,12 @@ namespace FewBox.Core.Web.Error
     {
         private INotificationHandler NotificationHandler { get; set; }
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
-        public TryCatchService(INotificationHandler notificationHandler, IExceptionProcessorService exceptionProcessorService)
+        private ILogger<TryCatchService> Logger { get; set; }
+        public TryCatchService(INotificationHandler notificationHandler, IExceptionProcessorService exceptionProcessorService, ILogger<TryCatchService> logger)
         {
             this.NotificationHandler = notificationHandler;
             this.ExceptionProcessorService = exceptionProcessorService;
+            this.Logger = logger;
         }
 
         public void TryCatch(Action action)
@@ -38,11 +41,8 @@ namespace FewBox.Core.Web.Error
             }
             catch (Exception exception)
             {
-                ConsoleColor consoleColor = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Blue;
                 string exceptionDetail = this.ExceptionProcessorService.DigInnerException(exception);
-                Console.WriteLine($"[FewBox-{Environment.MachineName} TryCatch In Console] {exceptionDetail}");
-                Console.ForegroundColor = consoleColor;
+                this.Logger.LogError(exceptionDetail);
             }
         }
     }

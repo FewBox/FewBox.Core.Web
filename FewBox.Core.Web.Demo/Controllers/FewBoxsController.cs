@@ -9,10 +9,11 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FewBoxsController : ResourcesController<IFewBoxRepository, Repositories.FewBox, Guid, FewBoxDto, PersistenceFewBoxDto>
+    public class FewBoxsController : ResourcesController<IFewBoxRepository, Repositories.FewBox, FewBoxDto, PersistenceFewBoxDto>
     {
-        public FewBoxsController(IFewBoxRepository fewBoxRepository, IMapper mapper) : base(fewBoxRepository, mapper)
+        public FewBoxsController(IFewBoxRepository repository, IMapper mapper) : base(repository, mapper)
         {
+            // SQLite ID must be Upcase.
         }
     }
 }

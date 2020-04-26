@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Security
 {
@@ -13,13 +15,15 @@ namespace FewBox.Core.Web.Security
         private IAuthService AuthService { get; set; }
         private ITokenService TokenService { get; set; }
         private IActionContextAccessor ActionContextAccessor { get; set; }
+        private ILogger<RoleHandler> Logger { get; set; }
 
-        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IActionContextAccessor actionContextAccessor)
+        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IActionContextAccessor actionContextAccessor, ILogger<RoleHandler> logger, IHttpContextAccessor accessor)
         {
             this.SecurityConfig = securityConfig;
             this.AuthService = authService;
             this.TokenService = tokenService;
             this.ActionContextAccessor = actionContextAccessor;
+            this.Logger = logger;
         }
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
@@ -36,28 +40,23 @@ namespace FewBox.Core.Web.Security
                 if (requirement != null)
                 {
                     if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
-                    requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog)
+                    requirement.RolePolicyType == RolePolicyType.ControllerAction)
                     {
                         doesUserHavePermission = this.AuthService.DoesUserHavePermission(this.SecurityConfig.Name, controller, action, userProfile.Roles);
                     }
-                    else if (requirement.RolePolicyType == RolePolicyType.Method ||
-                    requirement.RolePolicyType == RolePolicyType.Method)
+                    else if (requirement.RolePolicyType == RolePolicyType.Method)
                     {
                         doesUserHavePermission = this.AuthService.DoesUserHavePermission(method, userProfile.Roles);
                     }
-                    if (requirement.RolePolicyType == RolePolicyType.ControllerActionWithLog ||
-                    requirement.RolePolicyType == RolePolicyType.MethodWithLog)
+                    using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {method}"))
                     {
-                        Console.WriteLine($"Controller: {controller}");
-                        Console.WriteLine($"Action: {action}");
-                        Console.WriteLine($"Method: {method}");
                         foreach (var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
                         {
-                            Console.WriteLine($"Header: {header.Key} - {header.Value}");
+                            this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
                         }
                         foreach (var claim in context.User.Claims)
                         {
-                            Console.WriteLine($"Claim: {claim.Type}-{claim.Value}");
+                            this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
                         }
                     }
                 }
