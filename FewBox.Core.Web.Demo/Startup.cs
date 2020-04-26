@@ -7,6 +7,7 @@ using FewBox.Core.Utility.Formatter;
 using FewBox.Core.Utility.Net;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Demo.Repositories;
+using FewBox.Core.Web.Demo.Stub;
 using FewBox.Core.Web.Error;
 using FewBox.Core.Web.Filter;
 using FewBox.Core.Web.Notification;
@@ -101,7 +102,8 @@ namespace FewBox.Core.Web.Demo
             // Used for RBAC AOP.
             services.AddScoped<IAuthorizationHandler, RoleHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
-            services.AddScoped<IAuthService, RemoteAuthService>();
+            //services.AddScoped<IAuthService, RemoteAuthService>();
+            services.AddScoped<IAuthService, StubAuthService>();
             // Used for ORM.
             services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
             // services.AddScoped<IOrmSession, MySqlSession>(); // Note: MySql
@@ -178,7 +180,7 @@ namespace FewBox.Core.Web.Demo
         {
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseAuthorization();
+            app.UseAuthentication();
             app.UseOpenApi();
             app.UseStaticFiles();
             app.UseCors("all");
