@@ -120,17 +120,13 @@ namespace FewBox.Core.Web.Demo
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // Used for JWT.
             services.AddScoped<ITokenService, JWTToken>();
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidateAudience = false,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtConfig.Issuer,
@@ -181,6 +177,7 @@ namespace FewBox.Core.Web.Demo
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseOpenApi();
             app.UseStaticFiles();
             app.UseCors("all");
