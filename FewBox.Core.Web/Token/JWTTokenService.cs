@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -9,12 +9,14 @@ using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Token
 {
-    public class JWTToken : TokenService
+    public class JWTTokenService : TokenService
     {
-        ILogger<TokenService> Logger { get; set; }
-        public JWTToken(ILogger<JWTToken> logger)
+        private ILogger<TokenService> Logger { get; set; }
+        private JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+        public JWTTokenService(ILogger<JWTTokenService> logger)
         {
             this.Logger = logger;
+            this.JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
         public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
         {
@@ -44,20 +46,18 @@ namespace FewBox.Core.Web.Token
                     expires: DateTime.Now.AddTicks(expiredTime.Ticks),
                     signingCredentials: creds);
             }
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return this.JwtSecurityTokenHandler.WriteToken(token);
         }
 
         public override string GetUserIdByToken(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var jsonToken = this.JwtSecurityTokenHandler.ReadToken(token) as JwtSecurityToken;
             return jsonToken.Claims.FirstOrDefault(c => c.Type == TokenClaims.Id).Value;
         }
 
         public override UserProfile GetUserProfileByToken(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var jsonToken = this.JwtSecurityTokenHandler.ReadToken(token) as JwtSecurityToken;
             return new UserProfile
             {
                 Id = this.GetClaimValue(jsonToken.Claims, TokenClaims.Id),
@@ -70,13 +70,12 @@ namespace FewBox.Core.Web.Token
 
         public override bool ValidateToken(string token, string key, string issuer)
         {
-            var handler = new JwtSecurityTokenHandler();
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
             {
                 // Validation states:
                 ValidateLifetime = true,
-                ValidateAudience = false,
+                ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
                 // Validation parameters:
@@ -88,7 +87,7 @@ namespace FewBox.Core.Web.Token
             try
             {
                 SecurityToken securityToken;
-                claimsPricipal = handler.ValidateToken(token, tokenValidationParameters, out securityToken);
+                claimsPricipal = this.JwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
             }
             catch (Exception exception)
             {

@@ -26,21 +26,21 @@ namespace FewBox.Core.Core.UnitTest
             this.Key = "EnVsakc0bNXs1UYHAiOjE1ND";
             this.Issuer = "https://fewbox.com";
             Guid userId = Guid.NewGuid();
-            var loggerMock = new Mock<ILogger<JWTToken>>();
+            var loggerMock = new Mock<ILogger<JWTTokenService>>();
             var list = new List<string>();
-            loggerMock.Setup(l => l.Log<JWTToken>(
+            loggerMock.Setup(l => l.Log<JWTTokenService>(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
-                It.IsAny<JWTToken>(),
+                It.IsAny<JWTTokenService>(),
                 It.IsAny<Exception>(),
-                It.IsAny<Func<JWTToken, Exception, string>>()))
+                It.IsAny<Func<JWTTokenService, Exception, string>>()))
                 .Callback(
-                    delegate (LogLevel logLevel, EventId eventId, JWTToken state, Exception exception, Func<JWTToken, Exception, string> formatter)
+                    delegate (LogLevel logLevel, EventId eventId, JWTTokenService state, Exception exception, Func<JWTTokenService, Exception, string> formatter)
                     {
                         list.Add(state.ToString());
                     }
                 );
-            this.TokenService = new JWTToken(loggerMock.Object);
+            this.TokenService = new JWTTokenService(loggerMock.Object);
             this.UserInfo = new UserInfo
             {
                 Id = userId,

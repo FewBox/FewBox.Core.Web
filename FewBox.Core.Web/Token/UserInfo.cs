@@ -8,18 +8,20 @@ namespace FewBox.Core.Web.Token
     {
         private string key;
         public object Id { get; set; }
-        public string Key{ 
+        public string Key
+        {
             get
             {
                 return this.key;
-            } 
-            set {
-                if(value.Length<16)
+            }
+            set
+            {
+                if (value.Length < 16)
                 {
                     throw new UserInfoKeyLengthException();
                 }
                 this.key = value;
-            } 
+            }
         }
         public string Issuer { get; set; }
         public IEnumerable<Claim> Claims { get; set; }
