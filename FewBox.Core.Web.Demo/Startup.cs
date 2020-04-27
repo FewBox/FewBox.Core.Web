@@ -118,7 +118,7 @@ namespace FewBox.Core.Web.Demo
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // Used for JWT.
-            services.AddScoped<ITokenService, JWTToken>();
+            services.AddScoped<ITokenService, JWTTokenService>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
