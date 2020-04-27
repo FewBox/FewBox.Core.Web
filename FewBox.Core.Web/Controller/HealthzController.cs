@@ -17,6 +17,10 @@ namespace FewBox.Core.Web.Controller
             this.HealthyConfig = healthyConfig;
         }
 
+        /// <summary>
+        /// Get healthz status.
+        /// </summary>
+        /// <returns>Version, machinename, assembly version and assembly file version.</returns>
         [HttpGet]
         public PayloadResponseDto<HealthyDto> Get()
         {

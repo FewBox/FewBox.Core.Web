@@ -28,8 +28,12 @@ namespace FewBox.Core.Web.Controllers
             };
         }
 
-        [HttpGet("gettoken")]
-        public string GetToken()
+        /// <summary>
+        /// Get admin token.
+        /// </summary>
+        /// <returns>Token.</returns>
+        [HttpGet("getadmintoken")]
+        public string GetAdminToken()
         {
             Guid userId = Guid.Empty;
             var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin") };
@@ -44,21 +48,52 @@ namespace FewBox.Core.Web.Controllers
             return $"Bearer {token}";
         }
 
+        /// <summary>
+        /// Get normal token.
+        /// </summary>
+        /// <returns>Token.</returns>
+        [HttpGet("getnormaltoken")]
+        public string GetNormalToken()
+        {
+            Guid userId = Guid.Empty;
+            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Normal") };
+            var userInfo = new UserInfo
+            {
+                Id = userId.ToString(),
+                Key = this.JWTConfig.Key,
+                Issuer = this.JWTConfig.Issuer,
+                Claims = claims
+            };
+            string token = this.TokenService.GenerateToken(userInfo, TimeSpan.FromHours(1));
+            return $"Bearer {token}";
+        }
+
+        /// <summary>
+        /// Verify controller and action [JWTRole_ControllerAction Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpGet("controllerandaction")]
         [Authorize(Policy = "JWTRole_ControllerAction")]
-        public IList<Value> GetByWithHeader()
+        public IList<Value> VerifyControllerAndAction()
         {
             return this.Values;
         }
 
+        /// <summary>
+        /// Verify method(Verb) [JWTRole_Method Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpGet("method")]
         [Authorize(Policy = "JWTRole_Method")]
-        public IList<Value> GetByWithCookie()
+        public IList<Value> VerifyMethod()
         {
             return this.Values;
         }
 
-        // GET api/values
+        /// <summary>
+        /// Verify normal and admin roles [Default Claim Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpGet]
         [Authorize(Roles = "Normal, Admin")]
         public IList<Value> Get()
@@ -66,7 +101,10 @@ namespace FewBox.Core.Web.Controllers
             return this.Values;
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// Verify normal and admin roles [Default Claim Policy].
+        /// </summary>
+        /// <returns>Value.</returns>
         [Authorize(Roles = "Normal, Admin")]
         [HttpGet("{id}")]
         public Value Get(int id)
@@ -74,7 +112,10 @@ namespace FewBox.Core.Web.Controllers
             return this.Values.Where(p => p.Id == id).SingleOrDefault();
         }
 
-        // POST api/values
+        /// <summary>
+        /// Verify admin roles [Default Claim Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public dynamic Post([FromBody] Value value)
@@ -82,7 +123,10 @@ namespace FewBox.Core.Web.Controllers
             return new { IsSuccessful = true };
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// Verify admin roles [Default Claim Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public dynamic Put(int id, [FromBody] Value value)
@@ -90,7 +134,10 @@ namespace FewBox.Core.Web.Controllers
             return new { IsSuccessful = true };
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// Verify admin roles [Default Claim Policy].
+        /// </summary>
+        /// <returns>Values.</returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public dynamic Delete(int id)

@@ -19,6 +19,10 @@ namespace FewBox.Core.Web.Controller
             this.Repository = repository;
         }
 
+        /// <summary>
+        /// Get resources count. 
+        /// </summary>
+        /// <returns>Resouces count.</returns>
         [HttpGet("count")]
         public virtual PayloadResponseDto<int> GetCount()
         {
@@ -28,6 +32,10 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Get all resources.
+        /// </summary>
+        /// <returns>All resources.</returns>
         [HttpGet]
         public virtual PayloadResponseDto<IEnumerable<D>> Get()
         {
@@ -37,6 +45,12 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
         [HttpGet("paging")]
         public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] int pageIndex = 1, int pageRange = 5)
         {
@@ -50,6 +64,11 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Get resource by id.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <returns>Resource.</returns>
         [HttpGet("{id}")]
         public PayloadResponseDto<D> Get(Guid id)
         {
@@ -59,6 +78,11 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Save resource.
+        /// </summary>
+        /// <param name="persistenceDto">Resouce.</param>
+        /// <returns>Id payload.</returns>
         [HttpPost]
         [Transaction]
         public virtual PayloadResponseDto<Guid> Post([FromBody]PD persistenceDto)
@@ -70,6 +94,12 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Update whole resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <param name="persistenceDto">Resource.</param>
+        /// <returns>Effect rows.</returns>
         [HttpPut("{id}")]
         [Transaction]
         public virtual PayloadResponseDto<int> Put(Guid id, [FromBody]PD persistenceDto)
@@ -83,9 +113,15 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Update part resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <param name="jsonPatchDocument">Json patch document.</param>
+        /// <returns>Empty.</returns>
         [HttpPatch("{id}")]
         [Transaction]
-        public virtual MetaResponseDto Patch(Guid id, [FromBody]JsonPatchDocument<E> jsonPatchEntity)
+        public virtual MetaResponseDto Patch(Guid id, [FromBody]JsonPatchDocument<E> jsonPatchDocument)
         {
             /*
             [
@@ -93,7 +129,7 @@ namespace FewBox.Core.Web.Controller
             ]
             */
             E theEntity = this.Repository.FindOne(id);
-            jsonPatchEntity.ApplyTo(theEntity);
+            jsonPatchDocument.ApplyTo(theEntity);
             int effect = this.Repository.Update(theEntity);
             return new PayloadResponseDto<int>
             {
@@ -101,6 +137,11 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
+        /// <summary>
+        /// Delete resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <returns>Effect rows.</returns>
         [HttpDelete("{id}")]
         [Transaction]
         public virtual PayloadResponseDto<int> Delete(Guid id)

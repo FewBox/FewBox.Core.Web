@@ -4,7 +4,9 @@ using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
 namespace FewBox.Core.Web.Security
@@ -14,24 +16,26 @@ namespace FewBox.Core.Web.Security
         private SecurityConfig SecurityConfig { get; set; }
         private IAuthService AuthService { get; set; }
         private ITokenService TokenService { get; set; }
-        private IActionContextAccessor ActionContextAccessor { get; set; }
+        private IHttpContextAccessor HttpContextAccessor { get; set; }
         private ILogger<RoleHandler> Logger { get; set; }
 
-        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IActionContextAccessor actionContextAccessor, ILogger<RoleHandler> logger, IHttpContextAccessor accessor)
+        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IHttpContextAccessor httpContextAccessor, ILogger<RoleHandler> logger)
         {
             this.SecurityConfig = securityConfig;
             this.AuthService = authService;
             this.TokenService = tokenService;
-            this.ActionContextAccessor = actionContextAccessor;
+            this.HttpContextAccessor = httpContextAccessor;
             this.Logger = logger;
         }
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
         {
-            string method = this.ActionContextAccessor.ActionContext.HttpContext.Request.Method;
-            string controller = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["controller"];
-            string action = this.ActionContextAccessor.ActionContext.ActionDescriptor.RouteValues["action"];
-            string authorization = this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers["Authorization"];
+            var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
+            string method = this.HttpContextAccessor.HttpContext.Request.Method;
+            string authorization = this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
+            string controller = routeData.Values["controller"].ToString();
+            string action = routeData.Values["action"].ToString();
+
             bool doesUserHavePermission = false;
             if (!String.IsNullOrEmpty(authorization))
             {
@@ -50,7 +54,7 @@ namespace FewBox.Core.Web.Security
                     }
                     using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {method}"))
                     {
-                        foreach (var header in this.ActionContextAccessor.ActionContext.HttpContext.Request.Headers)
+                        foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
                         {
                             this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
                         }
