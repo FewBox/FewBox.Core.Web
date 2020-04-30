@@ -57,10 +57,6 @@ namespace FewBox.Core.Web.Demo
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
-                if (this.Environment.IsDevelopment())
-                {
-                    options.Filters.Add(new AllowAnonymousFilter()); // Ignore the authorization.
-                }
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
             })
@@ -92,8 +88,6 @@ namespace FewBox.Core.Web.Demo
             services.AddSingleton(jwtConfig); // JWT.
             var securityConfig = this.Configuration.GetSection("SecurityConfig").Get<SecurityConfig>();
             services.AddSingleton(securityConfig); // Auth Service.
-            var logConfig = this.Configuration.GetSection("LogConfig").Get<LogConfig>();
-            services.AddSingleton(logConfig); // Log Service.
             var notificationConfig = this.Configuration.GetSection("NotificationConfig").Get<NotificationConfig>();
             services.AddSingleton(notificationConfig); // Notification Service.
             var healthyConfig = this.Configuration.GetSection("HealthyConfig").Get<HealthyConfig>();
