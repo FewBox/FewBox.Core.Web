@@ -80,11 +80,11 @@ namespace FewBox.Core.Web.Controllers
         }
 
         /// <summary>
-        /// Verify method(Verb) [JWTRole_Method Policy].
+        /// Verify method(Verb) [JWTRole_Verb Policy].
         /// </summary>
         /// <returns>Values.</returns>
         [HttpGet("method")]
-        [Authorize(Policy = "JWTRole_Method")]
+        [Authorize(Policy = "JWTRole_Verb")]
         public IList<Value> VerifyMethod()
         {
             return this.Values;

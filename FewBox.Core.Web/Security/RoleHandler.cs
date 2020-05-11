@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Internal;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
@@ -31,10 +30,9 @@ namespace FewBox.Core.Web.Security
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
         {
             var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
-            string method = this.HttpContextAccessor.HttpContext.Request.Method;
+            string verb = this.HttpContextAccessor.HttpContext.Request.Method;
             string authorization = this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
-            string controller = routeData.Values["controller"].ToString();
-            string action = routeData.Values["action"].ToString();
+
 
             bool doesUserHavePermission = false;
             if (!String.IsNullOrEmpty(authorization))
@@ -43,25 +41,32 @@ namespace FewBox.Core.Web.Security
                 var userProfile = this.TokenService.GetUserProfileByToken(token);
                 if (requirement != null)
                 {
-                    if (requirement.RolePolicyType == RolePolicyType.ControllerAction ||
-                    requirement.RolePolicyType == RolePolicyType.ControllerAction)
+                    string serviceName = Assembly.GetEntryAssembly().GetName().Name;
+                    if (requirement.RolePolicyType == RolePolicyType.ControllerAction)
                     {
-                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(this.SecurityConfig.Name, controller, action, userProfile.Roles);
-                    }
-                    else if (requirement.RolePolicyType == RolePolicyType.Method)
-                    {
-                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(method, userProfile.Roles);
-                    }
-                    using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {method}"))
-                    {
-                        foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                        string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
+                        string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
+                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, controller, action, userProfile.Roles);
+                        using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
                         {
-                            this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
+                            foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                            {
+                                this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
+                            }
+                            foreach (var claim in context.User.Claims)
+                            {
+                                this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
+                            }
                         }
-                        foreach (var claim in context.User.Claims)
-                        {
-                            this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
-                        }
+                    }
+                    else if (requirement.RolePolicyType == RolePolicyType.Verb)
+                    {
+                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Verb, verb, userProfile.Roles);
+                    }
+                    else if (requirement.RolePolicyType == RolePolicyType.Hub)
+                    {
+                        string hub = this.HttpContextAccessor.HttpContext.Request.Path.Value.Split("/")[1];
+                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Hub, hub, userProfile.Roles);
                     }
                 }
             }

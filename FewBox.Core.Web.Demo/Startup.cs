@@ -6,6 +6,7 @@ using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Utility.Formatter;
 using FewBox.Core.Utility.Net;
 using FewBox.Core.Web.Config;
+using FewBox.Core.Web.Demo.Hubs;
 using FewBox.Core.Web.Demo.Repositories;
 using FewBox.Core.Web.Demo.Stub;
 using FewBox.Core.Web.Error;
@@ -161,6 +162,8 @@ namespace FewBox.Core.Web.Demo
             // Used for Sentry
             services.AddTransient<ISentryEventProcessor, SentryEventProcessor>();
             services.AddSingleton<ISentryEventExceptionProcessor, SentryEventExceptionProcessor>();
+            //  Used for SignalR
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -192,6 +195,7 @@ namespace FewBox.Core.Web.Demo
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<NotificationHub>("notificationHub");
                 endpoints.MapControllers();
             });
         }

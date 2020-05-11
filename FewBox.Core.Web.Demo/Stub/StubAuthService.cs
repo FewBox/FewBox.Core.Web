@@ -10,7 +10,7 @@ namespace FewBox.Core.Web.Demo.Stub
             return true;
         }
 
-        public bool DoesUserHavePermission(string method, IList<string> roles)
+        public bool DoesUserHavePermission(string service, AuthCodeType authCodeType, string code, IList<string> roles)
         {
             return true;
         }
