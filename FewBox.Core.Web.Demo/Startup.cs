@@ -71,12 +71,23 @@ namespace FewBox.Core.Web.Demo
                     options.AddDefaultPolicy(
                         builder =>
                         {
-                            builder.SetIsOriginAllowedToAllowWildcardSubdomains().WithOrigins("https://fewbox.com").AllowAnyMethod().AllowAnyHeader();
+                            builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .WithOrigins("https://fewbox.com", "https://figma.com")
+                            .AllowCredentials()
+                            .SetIsOriginAllowedToAllowWildcardSubdomains();
                         });
-                    options.AddPolicy("all",
+                    options.AddPolicy("dev",
                         builder =>
                         {
-                            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                            builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            //.AllowAnyOrigin()
+                            .WithOrigins("http://localhost", "https://localhost")
+                            .AllowCredentials()
+                            .SetIsOriginAllowedToAllowWildcardSubdomains();
                         });
                 }); // Cors.
             services.AddAutoMapper(typeof(Startup)); // Auto Mapper.
@@ -175,7 +186,7 @@ namespace FewBox.Core.Web.Demo
             app.UseAuthorization();
             app.UseOpenApi();
             app.UseStaticFiles();
-            app.UseCors("all");
+            app.UseCors("dev");
 
             if (env.IsDevelopment())
             {

@@ -5,6 +5,7 @@ using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
@@ -29,50 +30,61 @@ namespace FewBox.Core.Web.Security
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
         {
-            var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
             string verb = this.HttpContextAccessor.HttpContext.Request.Method;
-            string authorization = this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
-
+            string authorization = this.HttpContextAccessor.HttpContext.Request.Query["access_token"].Count > 0 ?
+            this.HttpContextAccessor.HttpContext.Request.Query["access_token"] : this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
 
             bool doesUserHavePermission = false;
-            if (!String.IsNullOrEmpty(authorization))
+            if (verb == HttpMethods.Options)
             {
-                string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
-                var userProfile = this.TokenService.GetUserProfileByToken(token);
-                if (requirement != null)
+                doesUserHavePermission = true;
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(authorization))
                 {
-                    string serviceName = Assembly.GetEntryAssembly().GetName().Name;
-                    if (requirement.RolePolicyType == RolePolicyType.ControllerAction)
+                    string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+                    var userProfile = this.TokenService.GetUserProfileByToken(token);
+                    if (requirement != null)
                     {
-                        string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
-                        string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
-                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, controller, action, userProfile.Roles);
-                        using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
+                        string serviceName = Assembly.GetEntryAssembly().GetName().Name;
+                        if (requirement.RolePolicyType == RolePolicyType.ControllerAction)
                         {
-                            foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                            var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
+                            string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
+                            string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
+                            doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, controller, action, userProfile.Roles);
+                            using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
                             {
-                                this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
-                            }
-                            foreach (var claim in context.User.Claims)
-                            {
-                                this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
+                                foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                                {
+                                    this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
+                                }
+                                foreach (var claim in context.User.Claims)
+                                {
+                                    this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
+                                }
                             }
                         }
-                    }
-                    else if (requirement.RolePolicyType == RolePolicyType.Verb)
-                    {
-                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Verb, verb, userProfile.Roles);
-                    }
-                    else if (requirement.RolePolicyType == RolePolicyType.Hub)
-                    {
-                        string hub = this.HttpContextAccessor.HttpContext.Request.Path.Value.Split("/")[1];
-                        doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Hub, hub, userProfile.Roles);
+                        else if (requirement.RolePolicyType == RolePolicyType.Verb)
+                        {
+                            doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Verb, verb, userProfile.Roles);
+                        }
+                        else if (requirement.RolePolicyType == RolePolicyType.Hub)
+                        {
+                            string hub = this.HttpContextAccessor.HttpContext.Request.Path.Value.Split("/")[1];
+                            doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Hub, hub, userProfile.Roles);
+                        }
                     }
                 }
             }
             if (doesUserHavePermission)
             {
                 context.Succeed(requirement);
+            }
+            else
+            {
+                Console.WriteLine($"[False]{this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }

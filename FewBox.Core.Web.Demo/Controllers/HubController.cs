@@ -1,11 +1,7 @@
-using System;
-using FewBox.Core.Web.Demo.Repositories;
-using FBR = FewBox.Core.Web.Demo.Repositories;
-using FewBox.Core.Web.Dto;
-using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using FewBox.Core.Web.Demo.Hubs;
+using FewBox.Core.Web.Demo.Dtos;
 
 namespace FewBox.Core.Web.Controllers
 {
@@ -21,15 +17,9 @@ namespace FewBox.Core.Web.Controllers
         }
 
         [HttpPost]
-        public void TestTransaction([FromBody] Notification notification)
+        public void TestTransaction([FromBody] NotificationDto notificationDto)
         {
-            this.HubContext.Clients.All.SendAsync(notification.ClientId, notification.Message);
-        }
-    }
-
-    public class Notification
-    {
-        public string ClientId { get; set; }
-        public string Message { get; set; }
+            this.HubContext.Clients.All.SendAsync("notify", notificationDto.ClientId, notificationDto.Message);
+        }        
     }
 }

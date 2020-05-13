@@ -58,7 +58,8 @@ namespace FewBox.Core.Core.UnitTest
         [TestMethod]
         public void TestToken()
         {
-            string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromMinutes(5));
+            string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromDays(5));
+            Console.WriteLine(token);
             Assert.AreEqual(this.UserInfo.Id.ToString(), this.TokenService.GetUserIdByToken(token));
             Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
             Assert.AreEqual("dev@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
