@@ -6,7 +6,7 @@ using FewBox.Core.Web.Demo.Dtos;
 namespace FewBox.Core.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     public class HubController : ControllerBase
     {
         private IHubContext<NotificationHub> HubContext { get; set; }

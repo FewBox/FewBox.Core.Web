@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FewBox.Core.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     public class FilterController : ControllerBase
     {
         private IFewBoxRepository FewBoxRepository { get; set; }

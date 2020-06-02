@@ -11,7 +11,7 @@ namespace FewBox.Core.Web.Controllers
 {
     // Header: Authorization, Bearer [JWT]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     public class JWTValuesController : ControllerBase
     {
         private ITokenService TokenService { get; set; }

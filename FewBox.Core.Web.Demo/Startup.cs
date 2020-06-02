@@ -29,6 +29,8 @@ using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Sentry.Extensibility;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using NSwag.Generation.AspNetCore;
 
 namespace FewBox.Core.Web.Demo
 {
@@ -42,6 +44,7 @@ namespace FewBox.Core.Web.Demo
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
+        private Action<OpenApiDocument> OpenApiDocumentAction { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -138,37 +141,27 @@ namespace FewBox.Core.Web.Demo
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key))
                 };
             });
+            // Used for ApiVersion
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true; // Show versions in response.
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+                options.DefaultApiVersion = new ApiVersion(1, 0); // new ApiVersion(1, 0, "alpha");
+            });
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
             // Used for Swagger Open Api Document.
             services.AddOpenApiDocument(config =>
             {
-                config.PostProcess = document =>
-                {
-                    document.Info.Version = "v1";
-                    document.Info.Title = "FewBox demo Api";
-                    document.Info.Description = "FewBox shipping, for more information please visit the 'https://fewbox.com'";
-                    document.Info.TermsOfService = "https://fewbox.com/terms";
-                    document.Info.Contact = new OpenApiContact
-                    {
-                        Name = "FewBox",
-                        Email = "support@fewbox.com",
-                        Url = "https://fewbox.com/support"
-                    };
-                    document.Info.License = new OpenApiLicense
-                    {
-                        Name = "Use under license",
-                        Url = "https://raw.githubusercontent.com/FewBox/FewBox.Service.Shipping/master/LICENSE"
-                    };
-                };
-                config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT"));
-                config.DocumentProcessors.Add(
-                    new SecurityDefinitionAppender("JWT", new OpenApiSecurityScheme
-                    {
-                        Type = OpenApiSecuritySchemeType.ApiKey,
-                        Name = "Authorization",
-                        Description = "Bearer [Token]",
-                        In = OpenApiSecurityApiKeyLocation.Header
-                    })
-                );
+                this.InitAspNetCoreOpenApiDocumentGeneratorSettings(config, "v1", new[] { "1-alpha", "1-beta", "1" }, "v1");
+            });
+            services.AddOpenApiDocument(config =>
+            {
+                this.InitAspNetCoreOpenApiDocumentGeneratorSettings(config, "v2", new[] { "2-alpha", "2-beta", "2" }, "v2");
             });
             // Used for Sentry
             services.AddTransient<ISentryEventProcessor, SentryEventProcessor>();
@@ -209,6 +202,45 @@ namespace FewBox.Core.Web.Demo
                 endpoints.MapHub<NotificationHub>("notificationHub");
                 endpoints.MapControllers();
             });
+        }
+
+        private void InitAspNetCoreOpenApiDocumentGeneratorSettings(AspNetCoreOpenApiDocumentGeneratorSettings config, string documentName, string[] apiGroupNames, string documentVersion)
+        {
+            config.DocumentName = documentName;
+            config.ApiGroupNames = apiGroupNames;
+            config.PostProcess = document =>
+            {
+                this.InitDocumentInfo(document, documentVersion);
+            };
+            config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT"));
+            config.DocumentProcessors.Add(
+                new SecurityDefinitionAppender("JWT", new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    Description = "Bearer [Token]",
+                    In = OpenApiSecurityApiKeyLocation.Header
+                })
+            );
+        }
+
+        private void InitDocumentInfo(OpenApiDocument document, string version)
+        {
+            document.Info.Version = version;
+            document.Info.Title = "FewBox Demo Api";
+            document.Info.Description = "FewBox shipping, for more information please visit the 'https://fewbox.com'";
+            document.Info.TermsOfService = "https://fewbox.com/terms";
+            document.Info.Contact = new OpenApiContact
+            {
+                Name = "FewBox",
+                Email = "support@fewbox.com",
+                Url = "https://fewbox.com/support"
+            };
+            document.Info.License = new OpenApiLicense
+            {
+                Name = "Use under license",
+                Url = "https://fewbox.com/license"
+            };
         }
     }
 }

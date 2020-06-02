@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     public class FewBoxsController : ResourcesController<IFewBoxRepository, Repositories.FewBox, FewBoxDto, PersistenceFewBoxDto>
     {
         public FewBoxsController(IFewBoxRepository repository, IMapper mapper) : base(repository, mapper)
