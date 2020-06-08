@@ -31,6 +31,7 @@ using NSwag.Generation.Processors.Security;
 using Sentry.Extensibility;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using NSwag.Generation.AspNetCore;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace FewBox.Core.Web.Demo
 {
@@ -60,6 +61,10 @@ namespace FewBox.Core.Web.Demo
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
+                if (this.Environment.IsDevelopment())
+                {
+                    options.Filters.Add(new AllowAnonymousFilter()); // Ignore the authorization.
+                }
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
             })
