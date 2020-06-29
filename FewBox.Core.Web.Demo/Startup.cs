@@ -198,7 +198,8 @@ namespace FewBox.Core.Web.Demo
             }
             if (env.IsProduction())
             {
-                app.UseReDoc();
+                app.UseReDoc(c => c.DocumentPath = "/swagger/v1/swagger.json");
+                app.UseReDoc(c => c.DocumentPath = "/swagger/v2/swagger.json");
                 app.UseHsts();
             }
 
