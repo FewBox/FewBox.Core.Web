@@ -29,6 +29,7 @@ namespace FewBox.Core.Web.Token
                     userInfo.Issuer,
                     userInfo.Issuer,
                     userInfo.Claims.Union(new List<Claim>{
+                        new Claim(TokenClaims.Tenant, userInfo.Tenant),
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
                         new Claim(TokenClaims.Issuer, userInfo.Issuer)
                     }),
@@ -40,6 +41,7 @@ namespace FewBox.Core.Web.Token
                     userInfo.Issuer,
                     userInfo.Issuer,
                     userInfo.Claims.Union(new List<Claim>{
+                        new Claim(TokenClaims.Tenant, userInfo.Tenant),
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
                         new Claim(TokenClaims.Issuer, userInfo.Issuer)
                     }),
@@ -60,6 +62,7 @@ namespace FewBox.Core.Web.Token
             var jsonToken = this.JwtSecurityTokenHandler.ReadToken(token) as JwtSecurityToken;
             return new UserProfile
             {
+                Tenant = this.GetClaimValue(jsonToken.Claims, TokenClaims.Tenant),
                 Id = this.GetClaimValue(jsonToken.Claims, TokenClaims.Id),
                 Issuer = this.GetClaimValue(jsonToken.Claims, TokenClaims.Issuer),
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),

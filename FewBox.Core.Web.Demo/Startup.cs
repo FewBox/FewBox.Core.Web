@@ -117,7 +117,8 @@ namespace FewBox.Core.Web.Demo
             //services.AddScoped<IAuthService, RemoteAuthService>();
             services.AddScoped<IAuthService, StubAuthService>();
             // Used for ORM.
-            services.AddScoped<IOrmConfiguration, AppSettingOrmConfiguration>();
+            //services.AddSingleton<IOrmConfiguration, AppSettingOrmConfiguration>();
+            services.AddScoped<IOrmConfiguration, AppSettingTenantOrmConfiguration>();
             // services.AddScoped<IOrmSession, MySqlSession>(); // Note: MySql
             services.AddScoped<IOrmSession, SQLiteSession>(); // Note: SQLite
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();

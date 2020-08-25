@@ -17,11 +17,11 @@ namespace FewBox.Core.Web.Filter
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            this.OrmSession.UnitOfWork.Start();
-            var resultContext = await next();
             int count = (((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo).GetCustomAttributes(false).Where(attribute => attribute is TransactionAttribute).Count();
             if (count > 0)
             {
+                this.OrmSession.UnitOfWork.Start();
+                var resultContext = await next();
                 if (resultContext.Exception == null)
                 {
                     this.OrmSession.UnitOfWork.Commit();
@@ -30,8 +30,13 @@ namespace FewBox.Core.Web.Filter
                 {
                     this.OrmSession.UnitOfWork.Rollback();
                 }
+                this.OrmSession.UnitOfWork.Stop();
             }
-            this.OrmSession.UnitOfWork.Stop();
+            else
+            {
+                var resultContext = await next();
+            }
+            
         }
     }
 

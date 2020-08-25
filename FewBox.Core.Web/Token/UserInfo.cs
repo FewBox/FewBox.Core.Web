@@ -7,6 +7,7 @@ namespace FewBox.Core.Web.Token
     public struct UserInfo
     {
         private string key;
+        public string Tenant { get; set; }
         public object Id { get; set; }
         public string Key
         {
