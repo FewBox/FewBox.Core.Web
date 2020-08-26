@@ -23,7 +23,15 @@ namespace FewBox.Core.Web.Orm
             }
             else
             {
-                this.ConnectionString = "";
+                string defaultConnectionString = configuration.GetConnectionString("DefaultConnection");
+                if (String.IsNullOrEmpty(defaultConnectionString))
+                {
+                    this.ConnectionString = "";
+                }
+                else
+                {
+                    this.ConnectionString = configuration.GetConnectionString("DefaultConnection");
+                }
             }
         }
 
