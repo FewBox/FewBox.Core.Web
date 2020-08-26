@@ -43,6 +43,7 @@ namespace FewBox.Core.Core.UnitTest
             this.TokenService = new JWTTokenService(loggerMock.Object);
             this.UserInfo = new UserInfo
             {
+                Tenant = "FewBox",
                 Id = userId,
                 Key = this.Key,
                 Issuer = this.Issuer,
@@ -81,6 +82,7 @@ namespace FewBox.Core.Core.UnitTest
         {
             var userInfo = new UserInfo
             {
+                Tenant = "FewBox",
                 Id = Guid.NewGuid(),
                 Key = "1234567890123456",
                 Issuer = this.Issuer,
