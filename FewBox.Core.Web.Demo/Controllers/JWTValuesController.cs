@@ -39,6 +39,7 @@ namespace FewBox.Core.Web.Controllers
             var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin") };
             var userInfo = new UserInfo
             {
+                Tenant = "FewBox",
                 Id = userId.ToString(),
                 Key = this.JWTConfig.Key,
                 Issuer = this.JWTConfig.Issuer,
@@ -59,6 +60,7 @@ namespace FewBox.Core.Web.Controllers
             var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Normal") };
             var userInfo = new UserInfo
             {
+                Tenant = "FewBox",
                 Id = userId.ToString(),
                 Key = this.JWTConfig.Key,
                 Issuer = this.JWTConfig.Issuer,

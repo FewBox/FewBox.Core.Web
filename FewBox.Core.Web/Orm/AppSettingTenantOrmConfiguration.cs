@@ -21,6 +21,10 @@ namespace FewBox.Core.Web.Orm
                 string connectionString = configuration.GetConnectionString("TenantConnection").Replace("[Tenant]", userProfile.Tenant);
                 this.ConnectionString = connectionString;
             }
+            else
+            {
+                this.ConnectionString = "";
+            }
         }
 
         public string GetConnectionString()
