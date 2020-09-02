@@ -29,8 +29,12 @@ namespace FewBox.Core.Web.Extension
 {
     public static class FewBoxExtension
     {
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL)
+        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, string[] origins = null)
         {
+            if (origins == null)
+            {
+                origins = new string[] { "https://fewbox.com", "https://figma.com" };
+            }
             // Init config.
             IConfigurationBuilder builder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
@@ -77,6 +81,10 @@ namespace FewBox.Core.Web.Extension
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
+                options.CacheProfiles.Add("default", new Microsoft.AspNetCore.Mvc.CacheProfile
+                {
+                    Duration = 3600 // One hour. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
+                });
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
             })
@@ -85,6 +93,31 @@ namespace FewBox.Core.Web.Extension
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             })
             .SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddCors(
+                options =>
+                {
+                    options.AddDefaultPolicy(
+                        builder =>
+                        {
+                            builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .WithOrigins(origins)
+                            .AllowCredentials()
+                            .SetIsOriginAllowedToAllowWildcardSubdomains();
+                        });
+                    options.AddPolicy("dev",
+                        builder =>
+                        {
+                            builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .WithOrigins("http://localhost", "https://localhost")
+                            .AllowCredentials()
+                            .SetIsOriginAllowedToAllowWildcardSubdomains();
+                        });
+
+                });
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
             services.AddMemoryCache(); // Memory cache.
@@ -97,6 +130,26 @@ namespace FewBox.Core.Web.Extension
             // Used for JWT.
             services.AddScoped<ITokenService, JWTTokenService>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddGoogle(options =>
+            {
+                options.ClientId = fewBoxConfig.Google.ClientId;
+                options.ClientSecret = fewBoxConfig.Google.ClientSecret;
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = fewBoxConfig.Facebook.AppId;
+                options.AppSecret = fewBoxConfig.Facebook.AppSecret;
+            })
+            .AddTwitter(options =>
+            {
+                options.ConsumerKey = fewBoxConfig.Twitter.ConsumerKey;
+                options.ConsumerSecret = fewBoxConfig.Twitter.ConsumerSecret;
+            })
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = fewBoxConfig.MicrosoftAccount.ClientId;
+                options.ClientSecret = fewBoxConfig.MicrosoftAccount.ClientSecret;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters

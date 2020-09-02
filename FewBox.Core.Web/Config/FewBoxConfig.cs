@@ -8,5 +8,9 @@ namespace FewBox.Core.Web.Config
         public OrmConfig Orm { get; set; }
         public RedisDistributedCacheConfig RedisDistributedCache { get; set; }
         public SecurityEndpointConfig SecurityEndpoint { get; set; }
+        public GoogleConfig Google { get; set; }
+        public FacebookConfig Facebook { get; set; }
+        public MicrosoftAccountConfig MicrosoftAccount { get; set; }
+        public TwitterConfig Twitter { get; set; }
     }
 }
