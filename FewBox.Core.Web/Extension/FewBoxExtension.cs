@@ -50,6 +50,7 @@ namespace FewBox.Core.Web.Extension
                 HttpUtility.IsCertificateNeedValidate = true; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, RemoteAuthService>();
                 services.AddScoped<INotificationHandler, ServiceNotificationHandler>();
+                services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
             }
             else
             {
@@ -58,6 +59,7 @@ namespace FewBox.Core.Web.Extension
                 HttpUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, StubeAuthService>();
                 services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
+                services.AddScoped<IAuthorizationHandler, AllowAnonymousHandler>(); // Used for RBAC AOP.
             }
             // Switch db.
             if (fewBoxDBType == FewBoxDBType.MySQL)
@@ -76,10 +78,6 @@ namespace FewBox.Core.Web.Extension
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
-                if (webHostEnvironment.IsDevelopment())
-                {
-                    options.Filters.Add(new AllowAnonymousFilter()); // Ignore the authorization.
-                }
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
             })
@@ -88,12 +86,10 @@ namespace FewBox.Core.Web.Extension
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             })
             .SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
             services.AddAutoMapper(typeof(FewBoxExtension)); // Auto Mapper.
             services.AddMemoryCache(); // Memory cache.
             services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>(); // Catch Exception.
-            // Used for RBAC AOP.
-            services.AddScoped<IAuthorizationHandler, RoleHandler>();
-            services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             services.AddScoped<ITryCatchService, TryCatchService>();
             // Used for IHttpContextAccessor&IActionContextAccessor context.
@@ -134,11 +130,12 @@ namespace FewBox.Core.Web.Extension
             //  Used for SignalR
             services.AddSignalR();
             // Used for ORM.
-            if(fewBoxConfig.Orm.InternalConnectionType == OrmConnectionType.Tenant)
+            if (fewBoxConfig.Orm.InternalConnectionType == OrmConnectionType.Tenant)
             {
                 services.AddScoped<IOrmConfiguration, AppSettingTenantOrmConfiguration>();
             }
-            else{
+            else
+            {
                 services.AddSingleton<IOrmConfiguration, AppSettingOrmConfiguration>();
             }
         }
