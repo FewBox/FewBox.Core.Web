@@ -10,11 +10,11 @@ namespace FewBox.Core.Web.Controller
     [ApiController]
     public class HealthzController : ControllerBase
     {
-        private HealthyConfig HealthyConfig { get; set; }
+        private FewBoxConfig FewBoxConfig { get; set; }
 
-        public HealthzController(HealthyConfig healthyConfig)
+        public HealthzController(FewBoxConfig fewBoxConfig)
         {
-            this.HealthyConfig = healthyConfig;
+            this.FewBoxConfig = fewBoxConfig;
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace FewBox.Core.Web.Controller
             {
                 Payload = new HealthyDto
                 {
-                    Version = this.HealthyConfig.Version,
+                    Version = this.FewBoxConfig.Healthy.Version,
                     MachineName = Environment.MachineName,
                     AssemblyVersion = Assembly.GetEntryAssembly().GetName().Version.ToString(),
                     AssemblyFileVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version

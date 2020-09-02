@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using FewBox.Core.Web.Security;
+﻿using System.Collections.Generic;
 
-namespace FewBox.Core.Web.Demo.Stub
+namespace FewBox.Core.Web.Security
 {
-    public class StubAuthService : IAuthService
+    public class StubeAuthService : IAuthService
     {
         public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
         {

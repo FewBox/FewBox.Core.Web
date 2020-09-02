@@ -15,13 +15,13 @@ namespace FewBox.Core.Web.Controllers
     public class JWTValuesController : ControllerBase
     {
         private ITokenService TokenService { get; set; }
-        private JWTConfig JWTConfig { get; set; }
+        private FewBoxConfig FewBoxConfig { get; set; }
         private IList<Value> Values { get; set; }
 
-        public JWTValuesController(ITokenService tokenService, JWTConfig jWTConfig)
+        public JWTValuesController(ITokenService tokenService, FewBoxConfig fewboxConfig)
         {
             this.TokenService = tokenService;
-            this.JWTConfig = jWTConfig;
+            this.FewBoxConfig = fewboxConfig;
             this.Values = new List<Value> {
                 new Value { Id = 1, Content = "Value1" },
                 new Value { Id = 2, Content = "Value2" }
@@ -41,8 +41,8 @@ namespace FewBox.Core.Web.Controllers
             {
                 Tenant = "FewBox",
                 Id = userId.ToString(),
-                Key = this.JWTConfig.Key,
-                Issuer = this.JWTConfig.Issuer,
+                Key = this.FewBoxConfig.JWT.Key,
+                Issuer = this.FewBoxConfig.JWT.Issuer,
                 Claims = claims
             };
             string token = this.TokenService.GenerateToken(userInfo, TimeSpan.FromHours(1));
@@ -62,8 +62,8 @@ namespace FewBox.Core.Web.Controllers
             {
                 Tenant = "FewBox",
                 Id = userId.ToString(),
-                Key = this.JWTConfig.Key,
-                Issuer = this.JWTConfig.Issuer,
+                Key = this.FewBoxConfig.JWT.Key,
+                Issuer = this.FewBoxConfig.JWT.Issuer,
                 Claims = claims
             };
             string token = this.TokenService.GenerateToken(userInfo, TimeSpan.FromHours(1));

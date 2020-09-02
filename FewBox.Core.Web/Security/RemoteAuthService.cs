@@ -11,25 +11,25 @@ namespace FewBox.Core.Web.Security
     public class RemoteAuthService : IAuthService
     {
         private IHttpContextAccessor HttpContextAccessor { get; set; }
-        private SecurityConfig SecurityConfig { get; set; }
+        private FewBoxConfig FewBoxConfig { get; set; }
         private ITryCatchService TryCatchService { get; set; }
 
-        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, SecurityConfig securityConfig, ITryCatchService tryCatchService)
+        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, FewBoxConfig fewboxConfig, ITryCatchService tryCatchService)
         {
             this.HttpContextAccessor = httpContextAccessor;
-            this.SecurityConfig = securityConfig;
+            this.FewBoxConfig = fewboxConfig;
             this.TryCatchService = tryCatchService;
         }
 
         public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
         {
-            string url = $"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{controller}/{action}";
+            string url = $"{this.FewBoxConfig.SecurityEndpoint.Protocol}://{this.FewBoxConfig.SecurityEndpoint.Host}:{this.FewBoxConfig.SecurityEndpoint.Port}/api/auth/{service}/{controller}/{action}";
             return this.VerifyRoles(url, roles);
         }
 
         public bool DoesUserHavePermission(string service, AuthCodeType authCodeType, string code, IList<string> roles)
         {
-            string url = $"{this.SecurityConfig.Protocol}://{this.SecurityConfig.Host}:{this.SecurityConfig.Port}/api/auth/{service}/{authCodeType.ToString().ToLower()}/{code}";
+            string url = $"{this.FewBoxConfig.SecurityEndpoint.Protocol}://{this.FewBoxConfig.SecurityEndpoint.Host}:{this.FewBoxConfig.SecurityEndpoint.Port}/api/auth/{service}/{authCodeType.ToString().ToLower()}/{code}";
             return this.VerifyRoles(url, roles);
         }
 

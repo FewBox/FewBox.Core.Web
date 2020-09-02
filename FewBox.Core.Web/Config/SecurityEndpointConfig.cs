@@ -1,6 +1,6 @@
-namespace FewBox.Core.Web.Config
+﻿namespace FewBox.Core.Web.Config
 {
-    public class SecurityConfig
+    public class SecurityEndpointConfig
     {
         public string Protocol { get; set; }
         public string Host { get; set; }

@@ -11,13 +11,13 @@ namespace FewBox.Core.Web.Notification
 {
     public class ServiceNotificationHandler : INotificationHandler
     {
-        private NotificationConfig NotificationConfig { get; set; }
+        private FewBoxConfig FewBoxConfig { get; set; }
         private ITryCatchService TryCatchService { get; set; }
         private IExceptionProcessorService ExceptionProcessorService { get; set; }
         private ILogger<ServiceNotificationHandler> Logger { get; set; }
-        public ServiceNotificationHandler(NotificationConfig notificationConfig, IExceptionProcessorService exceptionProcessorService, ILogger<ServiceNotificationHandler> logger)
+        public ServiceNotificationHandler(FewBoxConfig fewBoxConfig, IExceptionProcessorService exceptionProcessorService, ILogger<ServiceNotificationHandler> logger)
         {
-            this.NotificationConfig = notificationConfig;
+            this.FewBoxConfig = fewBoxConfig;
             this.ExceptionProcessorService = exceptionProcessorService;
             this.Logger = logger;
         }
@@ -27,7 +27,7 @@ namespace FewBox.Core.Web.Notification
             {
                 try
                 {
-                    RestfulUtility.Post<NotificationRequestDto, NotificationResponseDto>($"{this.NotificationConfig.Protocol}://{this.NotificationConfig.Host}:{this.NotificationConfig.Port}/api/notification", new Package<NotificationRequestDto>
+                    RestfulUtility.Post<NotificationRequestDto, NotificationResponseDto>($"{this.FewBoxConfig.Notification.Protocol}://{this.FewBoxConfig.Notification.Host}:{this.FewBoxConfig.Notification.Port}/api/notification", new Package<NotificationRequestDto>
                     {
                         Headers = new List<Header> { },
                         Body = new NotificationRequestDto

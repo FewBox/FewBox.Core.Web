@@ -13,15 +13,13 @@ namespace FewBox.Core.Web.Security
 {
     public class RoleHandler : AuthorizationHandler<RoleRequirement>
     {
-        private SecurityConfig SecurityConfig { get; set; }
         private IAuthService AuthService { get; set; }
         private ITokenService TokenService { get; set; }
         private IHttpContextAccessor HttpContextAccessor { get; set; }
         private ILogger<RoleHandler> Logger { get; set; }
 
-        public RoleHandler(SecurityConfig securityConfig, IAuthService authService, ITokenService tokenService, IHttpContextAccessor httpContextAccessor, ILogger<RoleHandler> logger)
+        public RoleHandler(IAuthService authService, ITokenService tokenService, IHttpContextAccessor httpContextAccessor, ILogger<RoleHandler> logger)
         {
-            this.SecurityConfig = securityConfig;
             this.AuthService = authService;
             this.TokenService = tokenService;
             this.HttpContextAccessor = httpContextAccessor;
