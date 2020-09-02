@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sentry.Extensibility;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.Mvc;
 using FewBox.Core.Web.Error;
@@ -87,7 +86,7 @@ namespace FewBox.Core.Web.Extension
             })
             .SetCompatibilityVersion(CompatibilityVersion.Latest);
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
-            services.AddAutoMapper(typeof(FewBoxExtension)); // Auto Mapper.
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
             services.AddMemoryCache(); // Memory cache.
             services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>(); // Catch Exception.
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
