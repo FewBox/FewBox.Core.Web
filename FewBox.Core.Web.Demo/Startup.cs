@@ -29,31 +29,6 @@ namespace FewBox.Core.Web.Demo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddFewBox(FewBoxDBType.SQLite);
-            services.AddCors(
-                options =>
-                {
-                    options.AddDefaultPolicy(
-                        builder =>
-                        {
-                            builder
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .WithOrigins("https://fewbox.com", "https://figma.com")
-                            .AllowCredentials()
-                            .SetIsOriginAllowedToAllowWildcardSubdomains();
-                        });
-                    options.AddPolicy("dev",
-                        builder =>
-                        {
-                            builder
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            //.AllowAnyOrigin()
-                            .WithOrigins("http://localhost", "https://localhost")
-                            .AllowCredentials()
-                            .SetIsOriginAllowedToAllowWildcardSubdomains();
-                        });
-                }); // Cors.
             // Used for Application.
             services.AddScoped<IFewBoxRepository, FewBoxRepository>();
             // Used for Swagger Open Api Document.
@@ -76,20 +51,22 @@ namespace FewBox.Core.Web.Demo
             app.UseAuthorization();
             app.UseOpenApi();
             app.UseStaticFiles();
-            app.UseCors("dev");
 
             if (env.IsDevelopment())
             {
+                app.UseCors("dev");
                 app.UseSwaggerUi3();
                 app.UseDeveloperExceptionPage();
             }
             if (env.IsStaging())
             {
+                app.UseCors("dev");
                 app.UseSwaggerUi3();
                 app.UseDeveloperExceptionPage();
             }
             if (env.IsProduction())
             {
+                app.UseCors();
                 app.UseReDoc(c => c.DocumentPath = "/swagger/v1/swagger.json");
                 app.UseReDoc(c => c.DocumentPath = "/swagger/v2/swagger.json");
                 app.UseHsts();
