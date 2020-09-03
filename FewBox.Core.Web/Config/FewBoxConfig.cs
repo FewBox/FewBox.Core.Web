@@ -12,5 +12,7 @@ namespace FewBox.Core.Web.Config
         public FacebookConfig Facebook { get; set; }
         public MicrosoftAccountConfig MicrosoftAccount { get; set; }
         public TwitterConfig Twitter { get; set; }
+        public TwitterConfig Twitter2 { get; set; }
+        public CorsConfig Cors { get; set; }
     }
 }

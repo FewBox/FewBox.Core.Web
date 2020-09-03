@@ -24,20 +24,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Orm;
+using System.Linq;
 
 namespace FewBox.Core.Web.Extension
 {
     public static class FewBoxExtension
     {
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, string[] origins = null)
+        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL)
         {
-            if (origins == null)
-            {
-                origins = new string[] { "https://fewbox.com", "https://figma.com" };
-            }
             // Init config.
             IConfigurationBuilder builder = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
+            .AddJsonFile("./appsettings.json")
             .AddEnvironmentVariables();
             IConfigurationRoot configuration = builder.Build();
             var fewBoxConfig = configuration.GetSection("FewBox").Get<FewBoxConfig>();
@@ -93,6 +90,11 @@ namespace FewBox.Core.Web.Extension
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             })
             .SetCompatibilityVersion(CompatibilityVersion.Latest);
+            string[] origins = null;// = fewBoxConfig.Cors.Origins.ToArray();
+            if (origins == null || origins.Length == 0)
+            {
+                origins = new string[] { "https://fewbox.com", "https://figma.com" };
+            }
             services.AddCors(
                 options =>
                 {
