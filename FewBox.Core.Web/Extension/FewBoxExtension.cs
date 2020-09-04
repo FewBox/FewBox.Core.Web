@@ -30,7 +30,7 @@ namespace FewBox.Core.Web.Extension
 {
     public static class FewBoxExtension
     {
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL)
+        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
         {
             // Init config.
             IConfigurationBuilder builder = new ConfigurationBuilder()
@@ -80,7 +80,7 @@ namespace FewBox.Core.Web.Extension
             {
                 options.CacheProfiles.Add("default", new Microsoft.AspNetCore.Mvc.CacheProfile
                 {
-                    Duration = 3600 // One hour. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
+                    Duration = responseCacheDuration // One hour. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
                 });
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
@@ -171,7 +171,7 @@ namespace FewBox.Core.Web.Extension
                 options.ReportApiVersions = true; // Show versions in response.
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
-                options.DefaultApiVersion = new ApiVersion(1, 0); // new ApiVersion(1, 0, "alpha");
+                options.DefaultApiVersion = defaultVersion == null ? ApiVersion.Default : defaultVersion; // new ApiVersion(1, 0, "alpha");
             });
             services.AddVersionedApiExplorer(options =>
             {

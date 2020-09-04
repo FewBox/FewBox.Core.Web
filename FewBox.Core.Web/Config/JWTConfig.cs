@@ -1,4 +1,4 @@
-﻿namespace FewBox.Core.Web.Config
+namespace FewBox.Core.Web.Config
 {
     public class JWTConfig
     {

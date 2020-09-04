@@ -6,7 +6,7 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/FewBox/FewBox.Core.Web/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://fewbox.com</PackageProjectUrl>
     <PackageTags>Web</PackageTags>
-    <Version>1.0.86</Version>
+    <Version>1.0.87</Version>
     <PackageIconUrl>https://secure.gravatar.com/avatar/ce54e932b36c8d58321cc956410c37ed</PackageIconUrl>
     <RepositoryUrl>https://github.com/FewBox/FewBox.Core.Web</RepositoryUrl>
     <Company>FewBox</Company>
