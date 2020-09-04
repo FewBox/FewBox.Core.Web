@@ -25,6 +25,7 @@ using System.Text;
 using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Orm;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FewBox.Core.Web.Extension
 {
@@ -90,10 +91,10 @@ namespace FewBox.Core.Web.Extension
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             })
             .SetCompatibilityVersion(CompatibilityVersion.Latest);
-            string[] origins = null;// = fewBoxConfig.Cors.Origins.ToArray();
-            if (origins == null || origins.Length == 0)
+            List<string> origins = new List<string> { "https://fewbox.com" };
+            if (fewBoxConfig.Cors != null && fewBoxConfig.Cors.Origins != null && fewBoxConfig.Cors.Origins.Count > 0)
             {
-                origins = new string[] { "https://fewbox.com", "https://figma.com" };
+                origins.AddRange(fewBoxConfig.Cors.Origins);
             }
             services.AddCors(
                 options =>
@@ -104,7 +105,7 @@ namespace FewBox.Core.Web.Extension
                             builder
                             .AllowAnyMethod()
                             .AllowAnyHeader()
-                            .WithOrigins(origins)
+                            .WithOrigins(origins.ToArray())
                             .AllowCredentials()
                             .SetIsOriginAllowedToAllowWildcardSubdomains();
                         });
