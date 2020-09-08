@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using System;
 using Dapper;
 using FewBox.Core.Persistence.Orm;
@@ -13,23 +13,20 @@ using Sentry.Extensibility;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.Mvc;
-using FewBox.Core.Web.Error;
 using Microsoft.AspNetCore.Authorization;
 using FewBox.Core.Web.Security;
 using FewBox.Core.Web.Token;
-using FewBox.Core.Web.Notification;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Orm;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace FewBox.Core.Web.Extension
 {
-    public static class FewBoxExtension
+    public static class FewBoxWebExtension
     {
         public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
         {
@@ -50,7 +47,6 @@ namespace FewBox.Core.Web.Extension
                 RestfulUtility.IsLogging = false; // Is logging request.
                 HttpUtility.IsCertificateNeedValidate = true; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, RemoteAuthService>();
-                services.AddScoped<INotificationHandler, ServiceNotificationHandler>();
                 services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
             }
             else
@@ -59,7 +55,6 @@ namespace FewBox.Core.Web.Extension
                 RestfulUtility.IsLogging = true; // Is logging request.
                 HttpUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, StubeAuthService>();
-                services.AddScoped<INotificationHandler, ConsoleNotificationHandler>();
                 services.AddScoped<IAuthorizationHandler, AllowAnonymousHandler>(); // Used for RBAC AOP.
             }
             // Switch db.
@@ -124,9 +119,7 @@ namespace FewBox.Core.Web.Extension
             services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
             services.AddMemoryCache(); // Memory cache.
-            services.AddSingleton<IExceptionProcessorService, ExceptionProcessorService>(); // Catch Exception.
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
-            services.AddScoped<ITryCatchService, TryCatchService>();
             // Used for IHttpContextAccessor&IActionContextAccessor context.
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

@@ -3,7 +3,6 @@ using System.Linq;
 using FewBox.Core.Utility.Net;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Dto;
-using FewBox.Core.Web.Error;
 using Microsoft.AspNetCore.Http;
 
 namespace FewBox.Core.Web.Security
@@ -12,13 +11,11 @@ namespace FewBox.Core.Web.Security
     {
         private IHttpContextAccessor HttpContextAccessor { get; set; }
         private FewBoxConfig FewBoxConfig { get; set; }
-        private ITryCatchService TryCatchService { get; set; }
 
-        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, FewBoxConfig fewboxConfig, ITryCatchService tryCatchService)
+        public RemoteAuthService(IHttpContextAccessor httpContextAccessor, FewBoxConfig fewboxConfig)
         {
             this.HttpContextAccessor = httpContextAccessor;
             this.FewBoxConfig = fewboxConfig;
-            this.TryCatchService = tryCatchService;
         }
 
         public bool DoesUserHavePermission(string service, string controller, string action, IList<string> roles)
@@ -39,21 +36,15 @@ namespace FewBox.Core.Web.Security
             PayloadResponseDto<IList<string>> response = null;
             if (this.HttpContextAccessor.HttpContext.Request.Headers.Keys.Contains("Authorization"))
             {
-                this.TryCatchService.TryCatch(() =>
-                {
-                    response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>(url,
+                response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>(url,
                     this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"],
                     headers);
-                });
 
             }
             else
             {
-                this.TryCatchService.TryCatch(() =>
-                {
-                    response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>(url,
+                response = RestfulUtility.Get<PayloadResponseDto<IList<string>>>(url,
                     headers);
-                });
             }
             if (response != null)
             {
