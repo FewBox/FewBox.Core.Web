@@ -1,6 +1,6 @@
 ﻿namespace FewBox.Core.Web.Security
 {
-    public enum RolePolicyType
+    public enum FewBoxPolicyType
     {
         ControllerAction,
         Verb,

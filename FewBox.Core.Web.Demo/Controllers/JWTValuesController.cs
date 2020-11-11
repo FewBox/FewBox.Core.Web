@@ -45,7 +45,7 @@ namespace FewBox.Core.Web.Controllers
                 Issuer = this.FewBoxConfig.JWT.Issuer,
                 Claims = claims
             };
-            string token = this.TokenService.GenerateToken(userInfo, TimeSpan.FromHours(1));
+            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
             return $"Bearer {token}";
         }
 
@@ -66,7 +66,7 @@ namespace FewBox.Core.Web.Controllers
                 Issuer = this.FewBoxConfig.JWT.Issuer,
                 Claims = claims
             };
-            string token = this.TokenService.GenerateToken(userInfo, TimeSpan.FromHours(1));
+            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
             return $"Bearer {token}";
         }
 

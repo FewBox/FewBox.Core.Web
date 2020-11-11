@@ -29,7 +29,7 @@ namespace FewBox.Core.Web.Demo.Controllers
                 Issuer = "Issuer",
                 Claims = claims
             };
-            string token = this.TokenService.GenerateToken(userInfo, new TimeSpan(DateTime.Now.AddHours(1).Ticks));
+            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
             return new PayloadResponseDto<string>
             {
                 Payload = $"Bearer {token}"

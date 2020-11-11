@@ -46,7 +46,7 @@ namespace FewBox.Core.Web.Security
                     if (requirement != null)
                     {
                         string serviceName = Assembly.GetEntryAssembly().GetName().Name;
-                        if (requirement.RolePolicyType == RolePolicyType.ControllerAction)
+                        if (requirement.FewBoxPolicyType == FewBoxPolicyType.ControllerAction)
                         {
                             var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
                             string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
@@ -64,11 +64,11 @@ namespace FewBox.Core.Web.Security
                                 }
                             }
                         }
-                        else if (requirement.RolePolicyType == RolePolicyType.Verb)
+                        else if (requirement.FewBoxPolicyType == FewBoxPolicyType.Verb)
                         {
                             doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Verb, verb, userProfile.Roles);
                         }
-                        else if (requirement.RolePolicyType == RolePolicyType.Hub)
+                        else if (requirement.FewBoxPolicyType == FewBoxPolicyType.Hub)
                         {
                             string hub = this.HttpContextAccessor.HttpContext.Request.Path.Value.Split("/")[1];
                             doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Hub, hub, userProfile.Roles);

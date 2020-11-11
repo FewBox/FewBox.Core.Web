@@ -59,7 +59,7 @@ namespace FewBox.Core.Core.UnitTest
         [TestMethod]
         public void TestToken()
         {
-            string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromDays(5));
+            string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddDays(5));
             Console.WriteLine(token);
             Assert.AreEqual(this.UserInfo.Id.ToString(), this.TokenService.GetUserIdByToken(token));
             Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
@@ -70,10 +70,9 @@ namespace FewBox.Core.Core.UnitTest
         //[TestMethod]
         public void TestExpiredToken()
         {
-            TimeSpan expiredTime = TimeSpan.FromSeconds(1);
-            string token = this.TokenService.GenerateToken(this.UserInfo, expiredTime);
+            string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddSeconds(1));
             Assert.IsTrue(this.TokenService.ValidateToken(token, this.Key, this.Issuer));
-            Thread.Sleep(expiredTime);
+            Thread.Sleep(1000);
             Assert.IsFalse(this.TokenService.ValidateToken(token, this.Key, this.Issuer));
         }
 

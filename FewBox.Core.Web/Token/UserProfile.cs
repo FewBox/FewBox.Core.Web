@@ -10,5 +10,6 @@ namespace FewBox.Core.Web.Token
         public string Name { get; set; }
         public string Email { get; set; }
         public IList<string> Roles { get; set; }
+        public IList<string> Apis { get; set; }
     }
 }

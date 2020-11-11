@@ -28,7 +28,7 @@ namespace FewBox.Core.Web.Extension
 {
     public static class FewBoxWebExtension
     {
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
+        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
         {
             // Init config.
             IConfigurationBuilder builder = new ConfigurationBuilder()
@@ -47,7 +47,48 @@ namespace FewBox.Core.Web.Extension
                 RestfulUtility.IsLogging = false; // Is logging request.
                 HttpUtility.IsCertificateNeedValidate = true; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, RemoteAuthService>();
-                services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
+                if (fewBoxAuthType == FewBoxAuthType.Role)
+                {
+                    services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
+                }
+                else
+                {
+                    services.AddScoped<IAuthorizationHandler, PayloadHandler>(); // Used for RBAC AOP.
+                }
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddGoogle(options =>
+                {
+                    options.ClientId = fewBoxConfig.Google.ClientId;
+                    options.ClientSecret = fewBoxConfig.Google.ClientSecret;
+                })
+                .AddFacebook(options =>
+                {
+                    options.AppId = fewBoxConfig.Facebook.AppId;
+                    options.AppSecret = fewBoxConfig.Facebook.AppSecret;
+                })
+                .AddTwitter(options =>
+                {
+                    options.ConsumerKey = fewBoxConfig.Twitter.ConsumerKey;
+                    options.ConsumerSecret = fewBoxConfig.Twitter.ConsumerSecret;
+                })
+                .AddMicrosoftAccount(options =>
+                {
+                    options.ClientId = fewBoxConfig.MicrosoftAccount.ClientId;
+                    options.ClientSecret = fewBoxConfig.MicrosoftAccount.ClientSecret;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = fewBoxConfig.JWT.Issuer,
+                        ValidAudience = fewBoxConfig.JWT.Issuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key))
+                    };
+                });
             }
             else
             {
@@ -55,7 +96,6 @@ namespace FewBox.Core.Web.Extension
                 RestfulUtility.IsLogging = true; // Is logging request.
                 HttpUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, StubeAuthService>();
-                services.AddScoped<IAuthorizationHandler, AllowAnonymousHandler>(); // Used for RBAC AOP.
             }
             // Switch db.
             if (fewBoxDBType == FewBoxDBType.MySQL)
@@ -116,7 +156,7 @@ namespace FewBox.Core.Web.Extension
                         });
 
                 });
-            services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
+            services.AddSingleton<IAuthorizationPolicyProvider, FewBoxAuthorizationPolicyProvider>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
             services.AddMemoryCache(); // Memory cache.
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
@@ -125,40 +165,6 @@ namespace FewBox.Core.Web.Extension
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // Used for JWT.
             services.AddScoped<ITokenService, JWTTokenService>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddGoogle(options =>
-            {
-                options.ClientId = fewBoxConfig.Google.ClientId;
-                options.ClientSecret = fewBoxConfig.Google.ClientSecret;
-            })
-            .AddFacebook(options =>
-            {
-                options.AppId = fewBoxConfig.Facebook.AppId;
-                options.AppSecret = fewBoxConfig.Facebook.AppSecret;
-            })
-            .AddTwitter(options =>
-            {
-                options.ConsumerKey = fewBoxConfig.Twitter.ConsumerKey;
-                options.ConsumerSecret = fewBoxConfig.Twitter.ConsumerSecret;
-            })
-            .AddMicrosoftAccount(options =>
-            {
-                options.ClientId = fewBoxConfig.MicrosoftAccount.ClientId;
-                options.ClientSecret = fewBoxConfig.MicrosoftAccount.ClientSecret;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = fewBoxConfig.JWT.Issuer,
-                    ValidAudience = fewBoxConfig.JWT.Issuer,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key))
-                };
-            });
             // Used for ApiVersion
             services.AddApiVersioning(options =>
             {

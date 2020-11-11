@@ -15,7 +15,7 @@ namespace FewBox.Core.Web.Token
             this.DistributedCache = distributedCache;
         }
 
-        public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
+        public override string GenerateToken(UserInfo userInfo, DateTime expiredTime)
         {
             string token = Guid.NewGuid().ToString();
             var userProfile = new UserProfile{
@@ -25,7 +25,7 @@ namespace FewBox.Core.Web.Token
                 Email = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
                 Roles = userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList()
             };
-            if(expiredTime == TimeSpan.Zero)
+            if(expiredTime == DateTime.MaxValue)
             {
                 this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile));
             }
@@ -33,7 +33,7 @@ namespace FewBox.Core.Web.Token
             {
                 DistributedCacheEntryOptions distributedCacheEntryOptions = new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = expiredTime
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromTicks(expiredTime.Ticks)
                 };
                 this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile), distributedCacheEntryOptions);
             }

@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace FewBox.Core.Web.Security
 {
-    public class RoleAuthorizationPolicyProvider : IAuthorizationPolicyProvider
+    public class FewBoxAuthorizationPolicyProvider : IAuthorizationPolicyProvider
     {
-        const string POLICY_PREFIX = "JWTRole_";
+        const string ROLEPOLICY_PREFIX = "JWTRole_";
+        const string PAYLOADPOLICY_PREFIX = "JWTPayload_";
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
         {
             return Task.FromResult(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
@@ -24,11 +25,18 @@ namespace FewBox.Core.Web.Security
 
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-            if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase) &&
-            Enum.TryParse<RolePolicyType>(policyName.Substring(POLICY_PREFIX.Length), out RolePolicyType rolePolicyType))
+            if (policyName.StartsWith(ROLEPOLICY_PREFIX, StringComparison.OrdinalIgnoreCase) &&
+            Enum.TryParse<FewBoxPolicyType>(policyName.Substring(ROLEPOLICY_PREFIX.Length), out FewBoxPolicyType rolePolicyType))
             {
                 var policy = new AuthorizationPolicyBuilder();
                 policy.AddRequirements(new RoleRequirement(rolePolicyType));
+                return Task.FromResult(policy.Build());
+            }
+            else if (policyName.StartsWith(PAYLOADPOLICY_PREFIX, StringComparison.OrdinalIgnoreCase) &&
+            Enum.TryParse<FewBoxPolicyType>(policyName.Substring(PAYLOADPOLICY_PREFIX.Length), out FewBoxPolicyType payloadPolicyType))
+            {
+                var policy = new AuthorizationPolicyBuilder();
+                policy.AddRequirements(new PayloadRequirement(payloadPolicyType));
                 return Task.FromResult(policy.Build());
             }
             return Task.FromResult<AuthorizationPolicy>(null);

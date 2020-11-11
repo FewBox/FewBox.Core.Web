@@ -21,7 +21,7 @@ namespace FewBox.Core.Core.UnitTest
         [TestMethod]
         public void TestToken()
         {
-            string token = this.TokenService.GenerateToken(this.UserInfo, TimeSpan.FromMinutes(5));
+            string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddMinutes(3));
             Assert.AreEqual(this.UserInfo.Id, this.TokenService.GetUserIdByToken(token));
         }
     }

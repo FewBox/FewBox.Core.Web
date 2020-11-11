@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace FewBox.Core.Web.Security
+﻿namespace FewBox.Core.Web.Security
 {
-    public class RoleRequirement : IAuthorizationRequirement
+    public class RoleRequirement : BaseRequirement
     {
-        public RolePolicyType RolePolicyType { get; set; }
-        public RoleRequirement(RolePolicyType rolePolicyType)
+        public RoleRequirement(FewBoxPolicyType fewBoxPolicyType) : base(fewBoxPolicyType)
         {
-            this.RolePolicyType = rolePolicyType;
         }
     }
 }

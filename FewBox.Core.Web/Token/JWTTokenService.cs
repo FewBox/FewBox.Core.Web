@@ -18,14 +18,12 @@ namespace FewBox.Core.Web.Token
             this.Logger = logger;
             this.JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
-        public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
+        public override string GenerateToken(UserInfo userInfo, DateTime expiredTime)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userInfo.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token;
-            if (expiredTime == TimeSpan.Zero)
-            {
-                token = new JwtSecurityToken(
+            token = new JwtSecurityToken(
                     userInfo.Issuer,
                     userInfo.Issuer,
                     userInfo.Claims.Union(new List<Claim>{
@@ -33,21 +31,8 @@ namespace FewBox.Core.Web.Token
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
                         new Claim(TokenClaims.Issuer, userInfo.Issuer)
                     }),
+                    expires: expiredTime,
                     signingCredentials: creds);
-            }
-            else
-            {
-                token = new JwtSecurityToken(
-                    userInfo.Issuer,
-                    userInfo.Issuer,
-                    userInfo.Claims.Union(new List<Claim>{
-                        new Claim(TokenClaims.Tenant, userInfo.Tenant),
-                        new Claim(TokenClaims.Id, userInfo.Id.ToString()),
-                        new Claim(TokenClaims.Issuer, userInfo.Issuer)
-                    }),
-                    expires: DateTime.Now.AddTicks(expiredTime.Ticks),
-                    signingCredentials: creds);
-            }
             return this.JwtSecurityTokenHandler.WriteToken(token);
         }
 
@@ -67,7 +52,8 @@ namespace FewBox.Core.Web.Token
                 Issuer = this.GetClaimValue(jsonToken.Claims, TokenClaims.Issuer),
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),
                 Email = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Email),
-                Roles = this.GetClaimValues(jsonToken.Claims, ClaimTypes.Role)
+                Roles = this.GetClaimValues(jsonToken.Claims, ClaimTypes.Role),
+                Apis = this.GetClaimValues(jsonToken.Claims, TokenClaims.Api)
             };
         }
 

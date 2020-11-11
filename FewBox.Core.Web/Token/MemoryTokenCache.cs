@@ -14,7 +14,7 @@ namespace FewBox.Core.Web.Token
             this.MemoryCache = memoryCache;
         }
 
-        public override string GenerateToken(UserInfo userInfo, TimeSpan expiredTime)
+        public override string GenerateToken(UserInfo userInfo, DateTime expiredTime)
         {
             string token = Guid.NewGuid().ToString();
             var userProfile = new UserProfile{
@@ -24,7 +24,7 @@ namespace FewBox.Core.Web.Token
                 Email = userInfo.Claims!=null ? userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value : String.Empty,
                 Roles = userInfo.Claims!=null ? userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList() : null
             };
-            if(expiredTime == TimeSpan.Zero)
+            if(expiredTime == DateTime.MaxValue)
             {
                 this.MemoryCache.Set<UserProfile>(token, userProfile);
             }
