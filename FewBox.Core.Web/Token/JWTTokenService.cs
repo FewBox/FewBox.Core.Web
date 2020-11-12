@@ -25,11 +25,12 @@ namespace FewBox.Core.Web.Token
             JwtSecurityToken token;
             token = new JwtSecurityToken(
                     userInfo.Issuer,
-                    userInfo.Issuer,
+                    userInfo.Audience,
                     userInfo.Claims.Union(new List<Claim>{
                         new Claim(TokenClaims.Tenant, userInfo.Tenant),
                         new Claim(TokenClaims.Id, userInfo.Id.ToString()),
-                        new Claim(TokenClaims.Issuer, userInfo.Issuer)
+                        new Claim(TokenClaims.Issuer, userInfo.Issuer),
+                        new Claim(TokenClaims.Audience, userInfo.Audience)
                     }),
                     expires: expiredTime,
                     signingCredentials: creds);
@@ -50,6 +51,7 @@ namespace FewBox.Core.Web.Token
                 Tenant = this.GetClaimValue(jsonToken.Claims, TokenClaims.Tenant),
                 Id = this.GetClaimValue(jsonToken.Claims, TokenClaims.Id),
                 Issuer = this.GetClaimValue(jsonToken.Claims, TokenClaims.Issuer),
+                Audience = this.GetClaimValue(jsonToken.Claims, TokenClaims.Audience),
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),
                 Email = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Email),
                 Roles = this.GetClaimValues(jsonToken.Claims, ClaimTypes.Role),

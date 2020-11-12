@@ -12,6 +12,7 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("api/v{v:apiVersion}/[controller]")]
+    [Authorize]
     [Authorize(Policy="JWTPayload_ControllerAction")]
     public class PayloadController : ControllerBase
     {
@@ -36,9 +37,11 @@ namespace FewBox.Core.Web.Demo.Controllers
                 Id = "UserId",
                 Key = this.FewBoxConfig.JWT.Key,
                 Issuer = this.FewBoxConfig.JWT.Issuer,
+                Audience = this.FewBoxConfig.JWT.Audience,
                 Claims = claims
             };
-            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
+            var expires = DateTime.Now.AddMinutes(1);
+            string token = this.TokenService.GenerateToken(userInfo, expires);
             return new PayloadResponseDto<string>
             {
                 Payload = $"Bearer {token}"

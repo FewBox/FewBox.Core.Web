@@ -78,15 +78,17 @@ namespace FewBox.Core.Web.Extension
                 })
                 .AddJwtBearer(options =>
                 {
+                    options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = false,
                         ValidateLifetime = true,
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = fewBoxConfig.JWT.Issuer,
-                        ValidAudience = fewBoxConfig.JWT.Issuer,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key))
+                        ValidAudience = fewBoxConfig.JWT.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key)),
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
             }
