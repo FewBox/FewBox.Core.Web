@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Security.Claims;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Dto;
@@ -27,7 +28,8 @@ namespace FewBox.Core.Web.Demo.Controllers
         [AllowAnonymous]
         public PayloadResponseDto<string> GetAdminToken()
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin"), new Claim(TokenClaims.Api, "Payload/Validate") };
+            string service = Assembly.GetEntryAssembly().GetName().Name;
+            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin"), new Claim(TokenClaims.Api, $"{service}/Payload/Validate") };
             var userInfo = new UserInfo
             {
                 Tenant = "FewBox",

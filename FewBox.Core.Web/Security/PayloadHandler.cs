@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using FewBox.Core.Web.Token;
 using Microsoft.AspNetCore.Authorization;
@@ -42,10 +43,11 @@ namespace FewBox.Core.Web.Security
                     var userProfile = this.TokenService.GetUserProfileByToken(token);
                     if (requirement != null)
                     {
+                        string service = Assembly.GetEntryAssembly().GetName().Name;
                         var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
                         string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
                         string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
-                        doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{controller}/{action}".ToLower()) > 0 : false;
+                        doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{service}/{controller}/{action}".ToLower()) > 0 : false;
                         using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
                         {
                             foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
