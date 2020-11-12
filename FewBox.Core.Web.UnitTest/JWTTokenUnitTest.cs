@@ -17,6 +17,7 @@ namespace FewBox.Core.Core.UnitTest
     {
         private string Key { get; set; }
         private string Issuer { get; set; }
+        private string Audience { get; set; }
         private ITokenService TokenService { get; set; }
         private UserInfo UserInfo { get; set; }
 
@@ -25,6 +26,7 @@ namespace FewBox.Core.Core.UnitTest
         {
             this.Key = "EnVsakc0bNXs1UYHAiOjE1ND";
             this.Issuer = "https://fewbox.com";
+            this.Audience = "https://figma.fewbox.com";
             Guid userId = Guid.NewGuid();
             var loggerMock = new Mock<ILogger<JWTTokenService>>();
             var list = new List<string>();
@@ -47,6 +49,7 @@ namespace FewBox.Core.Core.UnitTest
                 Id = userId,
                 Key = this.Key,
                 Issuer = this.Issuer,
+                Audience = this.Audience,
                 Claims = new List<Claim>{
                     new Claim(ClaimTypes.Name, "landpy" ),
                     new Claim(ClaimTypes.Email, "dev@fewbox.com"),
@@ -85,6 +88,7 @@ namespace FewBox.Core.Core.UnitTest
                 Id = Guid.NewGuid(),
                 Key = "1234567890123456",
                 Issuer = this.Issuer,
+                Audience = this.Audience,
                 Claims = new List<Claim>
                 {
                 }
