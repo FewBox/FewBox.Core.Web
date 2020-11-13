@@ -74,9 +74,9 @@ namespace FewBox.Core.Core.UnitTest
         public void TestExpiredToken()
         {
             string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddSeconds(1));
-            Assert.IsTrue(this.TokenService.ValidateToken(token, this.Key, this.Issuer));
+            Assert.IsTrue(this.TokenService.ValidateToken(token, this.Key, this.Issuer, this.Audience));
             Thread.Sleep(1000);
-            Assert.IsFalse(this.TokenService.ValidateToken(token, this.Key, this.Issuer));
+            Assert.IsFalse(this.TokenService.ValidateToken(token, this.Key, this.Issuer, this.Audience));
         }
 
         [TestMethod]
