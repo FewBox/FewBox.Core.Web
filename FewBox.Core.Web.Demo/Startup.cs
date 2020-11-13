@@ -10,6 +10,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using NSwag.Generation.AspNetCore;
 using FewBox.Core.Web.Extension;
+using System.Collections.Generic;
 
 namespace FewBox.Core.Web.Demo
 {
@@ -45,37 +46,10 @@ namespace FewBox.Core.Web.Demo
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseHttpsRedirection();
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseOpenApi();
-            app.UseStaticFiles();
-
-            if (env.IsDevelopment())
-            {
-                app.UseCors("dev");
-                app.UseSwaggerUi3();
-                app.UseDeveloperExceptionPage();
-            }
-            if (env.IsStaging())
-            {
-                app.UseCors("dev");
-                app.UseSwaggerUi3();
-                app.UseDeveloperExceptionPage();
-            }
-            if (env.IsProduction())
-            {
-                app.UseCors();
-                app.UseReDoc(c => c.DocumentPath = "/swagger/v1/swagger.json");
-                app.UseReDoc(c => c.DocumentPath = "/swagger/v2/swagger.json");
-                app.UseHsts();
-            }
-
+            app.UseFewBox(new List<string> { "/swagger/v1/swagger.json", "/swagger/v2/swagger.json" });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationHub>("notificationHub");
-                endpoints.MapControllers();
             });
         }
 

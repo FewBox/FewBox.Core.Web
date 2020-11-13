@@ -23,23 +23,34 @@ using System.Text;
 using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Orm;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace FewBox.Core.Web.Extension
 {
     public static class FewBoxWebExtension
     {
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
+        private static IConfigurationRoot Configuration { get; set; }
+        private static IWebHostEnvironment WebHostEnvironment { get; set; }
+        static FewBoxWebExtension()
         {
             // Init config.
             IConfigurationBuilder builder = new ConfigurationBuilder()
             .AddJsonFile("./appsettings.json")
             .AddEnvironmentVariables();
             IConfigurationRoot configuration = builder.Build();
-            var fewBoxConfig = configuration.GetSection("FewBox").Get<FewBoxConfig>();
+            Configuration = configuration;
+        }
+
+        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
+        {
+
+            var fewBoxConfig = Configuration.GetSection("FewBox").Get<FewBoxConfig>();
             services.AddSingleton(fewBoxConfig);
             // Init env.
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             IWebHostEnvironment webHostEnvironment = serviceProvider.GetService<IWebHostEnvironment>();
+            WebHostEnvironment = webHostEnvironment;
             // Switch env.
             if (webHostEnvironment.IsProduction())
             {
@@ -47,50 +58,6 @@ namespace FewBox.Core.Web.Extension
                 RestfulUtility.IsLogging = false; // Is logging request.
                 HttpUtility.IsCertificateNeedValidate = true; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, RemoteAuthService>();
-                if (fewBoxAuthType == FewBoxAuthType.Role)
-                {
-                    services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
-                }
-                else
-                {
-                    services.AddScoped<IAuthorizationHandler, PayloadHandler>(); // Used for RBAC AOP.
-                }
-                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddGoogle(options =>
-                {
-                    options.ClientId = fewBoxConfig.Google.ClientId;
-                    options.ClientSecret = fewBoxConfig.Google.ClientSecret;
-                })
-                .AddFacebook(options =>
-                {
-                    options.AppId = fewBoxConfig.Facebook.AppId;
-                    options.AppSecret = fewBoxConfig.Facebook.AppSecret;
-                })
-                .AddTwitter(options =>
-                {
-                    options.ConsumerKey = fewBoxConfig.Twitter.ConsumerKey;
-                    options.ConsumerSecret = fewBoxConfig.Twitter.ConsumerSecret;
-                })
-                .AddMicrosoftAccount(options =>
-                {
-                    options.ClientId = fewBoxConfig.MicrosoftAccount.ClientId;
-                    options.ClientSecret = fewBoxConfig.MicrosoftAccount.ClientSecret;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.SaveToken = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateLifetime = true,
-                        ValidateAudience = true,
-                        ValidateIssuer = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = fewBoxConfig.JWT.Issuer,
-                        ValidAudience = fewBoxConfig.JWT.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key)),
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
             }
             else
             {
@@ -99,6 +66,51 @@ namespace FewBox.Core.Web.Extension
                 HttpUtility.IsCertificateNeedValidate = false; // Whether check the ceritfication.
                 services.AddScoped<IAuthService, StubeAuthService>();
             }
+            // JWT
+            if (fewBoxAuthType == FewBoxAuthType.Role)
+            {
+                services.AddScoped<IAuthorizationHandler, RoleHandler>(); // Used for RBAC AOP.
+            }
+            else
+            {
+                services.AddScoped<IAuthorizationHandler, PayloadHandler>(); // Used for RBAC AOP.
+            }
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddGoogle(options =>
+            {
+                options.ClientId = fewBoxConfig.Google.ClientId;
+                options.ClientSecret = fewBoxConfig.Google.ClientSecret;
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = fewBoxConfig.Facebook.AppId;
+                options.AppSecret = fewBoxConfig.Facebook.AppSecret;
+            })
+            .AddTwitter(options =>
+            {
+                options.ConsumerKey = fewBoxConfig.Twitter.ConsumerKey;
+                options.ConsumerSecret = fewBoxConfig.Twitter.ConsumerSecret;
+            })
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = fewBoxConfig.MicrosoftAccount.ClientId;
+                options.ClientSecret = fewBoxConfig.MicrosoftAccount.ClientSecret;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateLifetime = true,
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = fewBoxConfig.JWT.Issuer,
+                    ValidAudience = fewBoxConfig.JWT.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(fewBoxConfig.JWT.Key)),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
             // Switch db.
             if (fewBoxDBType == FewBoxDBType.MySQL)
             {
@@ -156,7 +168,6 @@ namespace FewBox.Core.Web.Extension
                             .AllowCredentials()
                             .SetIsOriginAllowedToAllowWildcardSubdomains();
                         });
-
                 });
             services.AddSingleton<IAuthorizationPolicyProvider, FewBoxAuthorizationPolicyProvider>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
@@ -194,6 +205,41 @@ namespace FewBox.Core.Web.Extension
             {
                 services.AddSingleton<IOrmConfiguration, AppSettingOrmConfiguration>();
             }
+        }
+        public static void UseFewBox(this IApplicationBuilder app, IList<string> documentPaths)
+        {
+            app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseOpenApi();
+            app.UseStaticFiles();
+            if (WebHostEnvironment.IsProduction() || WebHostEnvironment.IsStaging())
+            {
+                app.UseCors();
+                foreach (string documentPath in documentPaths)
+                {
+                    app.UseReDoc(c => c.DocumentPath = documentPath);
+                }
+                app.UseHsts();
+            }
+            else if (WebHostEnvironment.IsDevelopment())
+            {
+                app.UseCors("dev");
+                app.UseSwaggerUi3();
+                app.UseDeveloperExceptionPage();
+            }
+            app.UseEndpoints(endpoints =>
+            {
+                if (WebHostEnvironment.IsDevelopment())
+                {
+                    endpoints.MapControllers().WithMetadata(new AllowAnonymousAttribute());
+                }
+                else
+                {
+                    endpoints.MapControllers();
+                }
+            });
         }
     }
 }
