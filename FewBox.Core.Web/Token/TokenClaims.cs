@@ -7,5 +7,6 @@ namespace FewBox.Core.Web.Token
         public const string Issuer = "http://schemas.fewbox.com/jwt/2019/04/identity/claims/issuer";
         public const string Audience = "http://schemas.fewbox.com/jwt/2019/04/identity/claims/audience";
         public const string Api = "http://schemas.fewbox.com/jwt/2019/04/identity/claims/api";
+        public const string Module = "http://schemas.fewbox.com/jwt/2019/04/identity/claims/module";
     }
 }
