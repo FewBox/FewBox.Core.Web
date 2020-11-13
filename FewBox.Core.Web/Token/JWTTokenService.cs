@@ -59,7 +59,7 @@ namespace FewBox.Core.Web.Token
             };
         }
 
-        public override bool ValidateToken(string token, string key, string issuer)
+        public override bool ValidateToken(string token, string key, string issuer, string audience)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
@@ -71,8 +71,9 @@ namespace FewBox.Core.Web.Token
                 ValidateIssuerSigningKey = true,
                 // Validation parameters:
                 ValidIssuer = issuer,
-                ClockSkew = TimeSpan.Zero,
-                IssuerSigningKey = securityKey
+                ValidAudience = audience,
+                IssuerSigningKey = securityKey,
+                ClockSkew = TimeSpan.Zero
             };
             ClaimsPrincipal claimsPricipal = null;
             try

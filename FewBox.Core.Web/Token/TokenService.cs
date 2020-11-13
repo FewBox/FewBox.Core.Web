@@ -11,6 +11,6 @@ namespace FewBox.Core.Web.Token
         public abstract string GenerateToken(UserInfo userInfo, DateTime expiredTime);
         public abstract string GetUserIdByToken(string token);
         public abstract UserProfile GetUserProfileByToken(string token);
-        public abstract bool ValidateToken(string token, string key, string issuer);
+        public abstract bool ValidateToken(string token, string key, string issuer, string audience);
     }
 }

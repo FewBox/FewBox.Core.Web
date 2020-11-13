@@ -8,6 +8,6 @@ namespace FewBox.Core.Web.Token
         string GenerateToken(UserInfo userInfo, DateTime expiredTime);
         string GetUserIdByToken(string token);
         UserProfile GetUserProfileByToken(string token);
-        bool ValidateToken(string token, string key, string issuer);
+        bool ValidateToken(string token, string key, string issuer, string audience);
     }
 }

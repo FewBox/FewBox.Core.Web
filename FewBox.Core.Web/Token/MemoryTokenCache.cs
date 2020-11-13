@@ -51,7 +51,7 @@ namespace FewBox.Core.Web.Token
             return this.MemoryCache.Get<UserProfile>(token);
         }
 
-        public override bool ValidateToken(string token, string key, string issuer)
+        public override bool ValidateToken(string token, string key, string issuer, string audience)
         {
             var userProfile = this.MemoryCache.Get<UserProfile>(token);
             return userProfile != null;

@@ -57,7 +57,7 @@ namespace FewBox.Core.Web.Token
             return JsonUtility.Deserialize<UserProfile>(userProfileString);
         }
 
-        public override bool ValidateToken(string token, string key, string issuer)
+        public override bool ValidateToken(string token, string key, string issuer, string audience)
         {
             string userProfileString = this.DistributedCache.GetString(token.ToString());
             return !String.IsNullOrEmpty(userProfileString);

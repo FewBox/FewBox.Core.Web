@@ -12,7 +12,6 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("api/v{v:apiVersion}/[controller]")]
-    [Authorize]
     [Authorize(Policy="JWTPayload_ControllerAction")]
     public class PayloadController : ControllerBase
     {
@@ -54,6 +53,15 @@ namespace FewBox.Core.Web.Demo.Controllers
             return new PayloadResponseDto<string>
             {
                 Payload = $"Hello World!"
+            };
+        }
+
+        [HttpGet("Validate403")]
+        public PayloadResponseDto<string> Validate403()
+        {
+            return new PayloadResponseDto<string>
+            {
+                Payload = $"Hello 403!"
             };
         }
     }
