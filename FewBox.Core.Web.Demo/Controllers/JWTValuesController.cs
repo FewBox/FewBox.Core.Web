@@ -36,16 +36,15 @@ namespace FewBox.Core.Web.Controllers
         public string GetAdminToken()
         {
             Guid userId = Guid.Empty;
-            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin") };
-            var userInfo = new UserInfo
+            var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
                 Id = userId.ToString(),
                 Key = this.FewBoxConfig.JWT.Key,
                 Issuer = this.FewBoxConfig.JWT.Issuer,
-                Claims = claims
+                Roles = new List<string> { "Admin" }
             };
-            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
+            string token = this.TokenService.GenerateToken(userProfile, DateTime.Now.AddHours(1));
             return $"Bearer {token}";
         }
 
@@ -57,16 +56,15 @@ namespace FewBox.Core.Web.Controllers
         public string GetNormalToken()
         {
             Guid userId = Guid.Empty;
-            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Normal") };
-            var userInfo = new UserInfo
+            var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
                 Id = userId.ToString(),
                 Key = this.FewBoxConfig.JWT.Key,
                 Issuer = this.FewBoxConfig.JWT.Issuer,
-                Claims = claims
+                Roles = new List<string> { "Normal" }
             };
-            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
+            string token = this.TokenService.GenerateToken(userProfile, DateTime.Now.AddHours(1));
             return $"Bearer {token}";
         }
 

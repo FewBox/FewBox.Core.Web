@@ -19,7 +19,7 @@ namespace FewBox.Core.Core.UnitTest
         private string Issuer { get; set; }
         private string Audience { get; set; }
         private ITokenService TokenService { get; set; }
-        private UserInfo UserInfo { get; set; }
+        private UserProfile UserProfile { get; set; }
 
         [TestInitialize]
         public void Init()
@@ -43,37 +43,34 @@ namespace FewBox.Core.Core.UnitTest
                     }
                 );
             this.TokenService = new JWTTokenService(loggerMock.Object);
-            this.UserInfo = new UserInfo
+            this.UserProfile = new UserProfile
             {
                 Tenant = "FewBox",
-                Id = userId,
+                Id = userId.ToString(),
                 Key = this.Key,
                 Issuer = this.Issuer,
                 Audience = this.Audience,
-                Claims = new List<Claim>{
-                    new Claim(ClaimTypes.Name, "landpy" ),
-                    new Claim(ClaimTypes.Email, "dev@fewbox.com"),
-                    new Claim(ClaimTypes.Role, "Admin"),
-                    new Claim(ClaimTypes.Role, "Normal")
-                }
+                Name = "landpy",
+                Email = "test@fewbox.com",
+                Roles = new List<string> { "Admin", "Nomal" }
             };
         }
 
         [TestMethod]
         public void TestToken()
         {
-            string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddDays(5));
+            string token = this.TokenService.GenerateToken(this.UserProfile, DateTime.Now.AddDays(5));
             Console.WriteLine(token);
-            Assert.AreEqual(this.UserInfo.Id.ToString(), this.TokenService.GetUserIdByToken(token));
+            Assert.AreEqual(this.UserProfile.Id.ToString(), this.TokenService.GetUserIdByToken(token));
             Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
-            Assert.AreEqual("dev@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
+            Assert.AreEqual("test@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
             Assert.AreEqual(2, this.TokenService.GetUserProfileByToken(token).Roles.Count);
         }
 
         //[TestMethod]
         public void TestExpiredToken()
         {
-            string token = this.TokenService.GenerateToken(this.UserInfo, DateTime.Now.AddSeconds(1));
+            string token = this.TokenService.GenerateToken(this.UserProfile, DateTime.Now.AddSeconds(1));
             Assert.IsTrue(this.TokenService.ValidateToken(token, this.Key, this.Issuer, this.Audience));
             Thread.Sleep(1000);
             Assert.IsFalse(this.TokenService.ValidateToken(token, this.Key, this.Issuer, this.Audience));
@@ -82,32 +79,26 @@ namespace FewBox.Core.Core.UnitTest
         [TestMethod]
         public void TestTokenLengthGe16()
         {
-            var userInfo = new UserInfo
+            var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Key = "1234567890123456",
                 Issuer = this.Issuer,
-                Audience = this.Audience,
-                Claims = new List<Claim>
-                {
-                }
+                Audience = this.Audience
             };
-            Assert.IsNotNull(this.TokenService.GenerateToken(userInfo));
+            Assert.IsNotNull(this.TokenService.GenerateToken(userProfile));
         }
 
         [TestMethod]
         public void TestTokenLengthLe16()
         {
-            UserInfo userInfo;
-            Assert.ThrowsException<UserInfoKeyLengthException>(() => userInfo = new UserInfo
+            UserProfile userProfile;
+            Assert.ThrowsException<UserInfoKeyLengthException>(() => userProfile = new UserProfile
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Key = "123456789012345",
-                Issuer = this.Issuer,
-                Claims = new List<Claim>
-                {
-                }
+                Issuer = this.Issuer
             });
         }
 

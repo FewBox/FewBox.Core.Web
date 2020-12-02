@@ -20,16 +20,15 @@ namespace FewBox.Core.Web.Demo.Controllers
         [HttpGet]
         public PayloadResponseDto<string> Get()
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin") };
-            var userInfo = new UserInfo
+            var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
                 Id = "UserId",
                 Key = "DeliveryTheAppByLove",
                 Issuer = "Issuer",
-                Claims = claims
+                Roles = new List<string> { "Admin" }
             };
-            string token = this.TokenService.GenerateToken(userInfo, DateTime.Now.AddHours(1));
+            string token = this.TokenService.GenerateToken(userProfile, DateTime.Now.AddHours(1));
             return new PayloadResponseDto<string>
             {
                 Payload = $"Bearer {token}"

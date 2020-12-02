@@ -12,11 +12,11 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("api/v{v:apiVersion}/[controller]")]
-    [Authorize(Policy="JWTPayload_ControllerAction")]
+    [Authorize(Policy = "JWTPayload_ControllerAction")]
     public class PayloadController : ControllerBase
     {
         private ITokenService TokenService { get; set; }
-        private FewBoxConfig FewBoxConfig {get;set;}
+        private FewBoxConfig FewBoxConfig { get; set; }
 
         public PayloadController(ITokenService tokenService, FewBoxConfig fewBoxConfig)
         {
@@ -29,18 +29,18 @@ namespace FewBox.Core.Web.Demo.Controllers
         public PayloadResponseDto<string> GetAdminToken()
         {
             string service = Assembly.GetEntryAssembly().GetName().Name;
-            var claims = new List<Claim> { new Claim(ClaimTypes.Role, "Admin"), new Claim(TokenClaims.Api, $"{service}/Payload/Validate") };
-            var userInfo = new UserInfo
+            var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
                 Id = "UserId",
                 Key = this.FewBoxConfig.JWT.Key,
                 Issuer = this.FewBoxConfig.JWT.Issuer,
                 Audience = this.FewBoxConfig.JWT.Audience,
-                Claims = claims
+                Roles = new List<string> { "Admin" },
+                Apis = new List<string> { $"{service}/Payload/Validate" }
             };
             var expires = DateTime.Now.AddMinutes(1);
-            string token = this.TokenService.GenerateToken(userInfo, expires);
+            string token = this.TokenService.GenerateToken(userProfile, expires);
             return new PayloadResponseDto<string>
             {
                 Payload = $"Bearer {token}"

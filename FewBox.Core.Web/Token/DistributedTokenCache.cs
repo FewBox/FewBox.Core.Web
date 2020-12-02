@@ -15,16 +15,9 @@ namespace FewBox.Core.Web.Token
             this.DistributedCache = distributedCache;
         }
 
-        public override string GenerateToken(UserInfo userInfo, DateTime expiredTime)
+        public override string GenerateToken(UserProfile userProfile, DateTime expiredTime)
         {
             string token = Guid.NewGuid().ToString();
-            var userProfile = new UserProfile{
-                Issuer = userInfo.Issuer,
-                Id = userInfo.Id.ToString(),
-                Name = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value,
-                Email = userInfo.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
-                Roles = userInfo.Claims.Where(c => c.Type== ClaimTypes.Role).Select(c => c.Value).ToList()
-            };
             if(expiredTime == DateTime.MaxValue)
             {
                 this.DistributedCache.SetString(token.ToString(), JsonUtility.Serialize<UserProfile>(userProfile));

@@ -18,19 +18,38 @@ namespace FewBox.Core.Web.Token
             this.Logger = logger;
             this.JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
-        public override string GenerateToken(UserInfo userInfo, DateTime expiredTime)
+        public override string GenerateToken(UserProfile userProfile, DateTime expiredTime)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userInfo.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userProfile.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token;
+            List<Claim> claims = new List<Claim>();
+            if (userProfile.Roles != null && userProfile.Roles.Count > 0)
+            {
+                var roleClaims = userProfile.Roles.Select(role => new Claim(ClaimTypes.Role, role));
+                claims.AddRange(roleClaims);
+            }
+            if (userProfile.Apis != null && userProfile.Apis.Count > 0)
+            {
+                var apiClaims = userProfile.Apis.Select(api => new Claim(TokenClaims.Api, api));
+                claims.AddRange(apiClaims);
+            }
+            if (userProfile.Modules != null && userProfile.Modules.Count > 0)
+            {
+                var moduleClaims = userProfile.Modules.Select(module => new Claim(TokenClaims.Module, module));
+                claims.AddRange(moduleClaims);
+            }
             token = new JwtSecurityToken(
-                    userInfo.Issuer,
-                    userInfo.Audience,
-                    userInfo.Claims.Union(new List<Claim>{
-                        new Claim(TokenClaims.Tenant, userInfo.Tenant),
-                        new Claim(TokenClaims.Id, userInfo.Id.ToString()),
-                        new Claim(TokenClaims.Issuer, userInfo.Issuer),
-                        new Claim(TokenClaims.Audience, userInfo.Audience)
+                    userProfile.Issuer,
+                    userProfile.Audience,
+                    claims.Union(new List<Claim>{
+                        new Claim(ClaimTypes.MobilePhone, userProfile.MobilePhone==null?String.Empty:userProfile.MobilePhone),
+                        new Claim(ClaimTypes.Name, userProfile.Name==null?String.Empty:userProfile.Name),
+                        new Claim(ClaimTypes.Email, userProfile.Email==null?String.Empty:userProfile.Email),
+                        new Claim(TokenClaims.Tenant, userProfile.Tenant==null?String.Empty:userProfile.Tenant),
+                        new Claim(TokenClaims.Id, userProfile.Id==null?String.Empty:userProfile.Id),
+                        new Claim(TokenClaims.Issuer, userProfile.Issuer==null?String.Empty:userProfile.Issuer),
+                        new Claim(TokenClaims.Audience, userProfile.Audience==null?String.Empty:userProfile.Audience)
                     }),
                     expires: expiredTime,
                     signingCredentials: creds);
