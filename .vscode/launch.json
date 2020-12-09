@@ -6,7 +6,7 @@
    "configurations": [
 
         {
-            "name": ".NET Core Launch (console)",
+            "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -19,8 +19,8 @@
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development",
-                //"ASPNETCORE_ENVIRONMENT": "Production"
+                //"ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_ENVIRONMENT": "Production"
             }
         },
         {

@@ -29,7 +29,7 @@ namespace FewBox.Core.Web.Demo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddFewBox(FewBoxDBType.SQLite);
+            services.AddFewBox(FewBoxDBType.SQLite, FewBoxAuthType.Payload);
             // Used for Application.
             services.AddScoped<IFewBoxRepository, FewBoxRepository>();
             // Used for Swagger Open Api Document.
