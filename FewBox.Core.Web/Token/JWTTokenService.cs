@@ -74,7 +74,8 @@ namespace FewBox.Core.Web.Token
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),
                 Email = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Email),
                 Roles = this.GetClaimValues(jsonToken.Claims, ClaimTypes.Role),
-                Apis = this.GetClaimValues(jsonToken.Claims, TokenClaims.Api)
+                GzipApis = this.GetClaimValue(jsonToken.Claims, TokenClaims.Api),
+                GzipModules = this.GetClaimValue(jsonToken.Claims, TokenClaims.Module)
             };
         }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using FewBox.Core.Utility.Compress;
+using FewBox.Core.Utility.Formatter;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Token;
@@ -29,6 +31,8 @@ namespace FewBox.Core.Web.Demo.Controllers
         public PayloadResponseDto<string> GetAdminToken()
         {
             string service = Assembly.GetEntryAssembly().GetName().Name;
+            IList<string> apis = new List<string> { $"{service}/Payload/Validate" };
+            IList<string> modules = new List<string> { $"DASHBOARD" };
             var userProfile = new UserProfile
             {
                 Tenant = "FewBox",
@@ -37,7 +41,8 @@ namespace FewBox.Core.Web.Demo.Controllers
                 Issuer = this.FewBoxConfig.JWT.Issuer,
                 Audience = this.FewBoxConfig.JWT.Audience,
                 Roles = new List<string> { "Admin" },
-                Apis = new List<string> { $"{service}/Payload/Validate" }
+                GzipApis = GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(apis)),
+                GzipModules = GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(modules))
             };
             var expires = DateTime.Now.AddMinutes(1);
             string token = this.TokenService.GenerateToken(userProfile, expires);
