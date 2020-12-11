@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FewBox.Core.Utility.Compress;
 using FewBox.Core.Utility.Formatter;
@@ -36,16 +37,30 @@ namespace FewBox.Core.Web.Token
         {
             get
             {
-                string gzip = GzipUtility.Unzip(this.GzipApis);
-                return JsonUtility.Deserialize<IList<string>>(gzip);
+                if (String.IsNullOrEmpty(this.GzipApis))
+                {
+                    return new List<string>();
+                }
+                else
+                {
+                    string gzip = GzipUtility.Unzip(this.GzipApis);
+                    return JsonUtility.Deserialize<IList<string>>(gzip);
+                }
             }
         }
         public IList<string> Modules
         {
             get
             {
-                string gzip = GzipUtility.Unzip(this.GzipModules);
-                return JsonUtility.Deserialize<IList<string>>(gzip);
+                if (String.IsNullOrEmpty(this.GzipModules))
+                {
+                    return new List<string>();
+                }
+                else
+                {
+                    string gzip = GzipUtility.Unzip(this.GzipModules);
+                    return JsonUtility.Deserialize<IList<string>>(gzip);
+                }
             }
         }
     }
