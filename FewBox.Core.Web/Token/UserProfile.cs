@@ -31,37 +31,21 @@ namespace FewBox.Core.Web.Token
         public string Email { get; set; }
         public string MobilePhone { get; set; }
         public IList<string> Roles { get; set; }
-        public string GzipApis { get; set; }
-        public string GzipModules { get; set; }
-        public IList<string> Apis
+        internal string GzipApis
         {
             get
             {
-                if (String.IsNullOrEmpty(this.GzipApis))
-                {
-                    return new List<string>();
-                }
-                else
-                {
-                    string gzip = GzipUtility.Unzip(this.GzipApis);
-                    return JsonUtility.Deserialize<IList<string>>(gzip);
-                }
+                return GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(this.Apis));
             }
         }
-        public IList<string> Modules
+        internal string GzipModules
         {
             get
             {
-                if (String.IsNullOrEmpty(this.GzipModules))
-                {
-                    return new List<string>();
-                }
-                else
-                {
-                    string gzip = GzipUtility.Unzip(this.GzipModules);
-                    return JsonUtility.Deserialize<IList<string>>(gzip);
-                }
+                return GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(this.Modules));
             }
         }
+        public IList<string> Apis { get; set; }
+        public IList<string> Modules { get; set; }
     }
 }

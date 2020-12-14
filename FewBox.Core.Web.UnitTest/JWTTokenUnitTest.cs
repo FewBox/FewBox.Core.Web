@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using FewBox.Core.Web.Token;
@@ -52,7 +51,9 @@ namespace FewBox.Core.Core.UnitTest
                 Audience = this.Audience,
                 Name = "landpy",
                 Email = "test@fewbox.com",
-                Roles = new List<string> { "Admin", "Nomal" }
+                Roles = new List<string> { "Admin", "Nomal" },
+                Apis = new List<string> { "Service/Controller/Action" },
+                Modules = new List<string> { "Service/Module" }
             };
         }
 
@@ -64,7 +65,10 @@ namespace FewBox.Core.Core.UnitTest
             Assert.AreEqual(this.UserProfile.Id.ToString(), this.TokenService.GetUserIdByToken(token));
             Assert.AreEqual("landpy", this.TokenService.GetUserProfileByToken(token).Name);
             Assert.AreEqual("test@fewbox.com", this.TokenService.GetUserProfileByToken(token).Email);
-            Assert.AreEqual(2, this.TokenService.GetUserProfileByToken(token).Roles.Count);
+            var userProfile = this.TokenService.GetUserProfileByToken(token);
+            Assert.AreEqual(2, userProfile.Roles.Count);
+            Assert.AreEqual(1, userProfile.Apis.Count);
+            Assert.AreEqual(1, userProfile.Modules.Count);
         }
 
         //[TestMethod]

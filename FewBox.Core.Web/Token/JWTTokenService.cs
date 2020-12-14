@@ -6,6 +6,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using FewBox.Core.Utility.Compress;
+using FewBox.Core.Utility.Formatter;
 
 namespace FewBox.Core.Web.Token
 {
@@ -31,13 +33,11 @@ namespace FewBox.Core.Web.Token
             }
             if (userProfile.Apis != null && userProfile.Apis.Count > 0)
             {
-                var apiClaims = userProfile.Apis.Select(api => new Claim(TokenClaims.Api, api));
-                claims.AddRange(apiClaims);
+                claims.Add(new Claim(TokenClaims.Api, userProfile.GzipApis));
             }
             if (userProfile.Modules != null && userProfile.Modules.Count > 0)
             {
-                var moduleClaims = userProfile.Modules.Select(module => new Claim(TokenClaims.Module, module));
-                claims.AddRange(moduleClaims);
+                claims.Add(new Claim(TokenClaims.Module, userProfile.GzipModules));
             }
             token = new JwtSecurityToken(
                     userProfile.Issuer,
@@ -74,8 +74,8 @@ namespace FewBox.Core.Web.Token
                 Name = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Name),
                 Email = this.GetClaimValue(jsonToken.Claims, ClaimTypes.Email),
                 Roles = this.GetClaimValues(jsonToken.Claims, ClaimTypes.Role),
-                GzipApis = this.GetClaimValue(jsonToken.Claims, TokenClaims.Api),
-                GzipModules = this.GetClaimValue(jsonToken.Claims, TokenClaims.Module)
+                Apis = JsonUtility.Deserialize<IList<string>>(GzipUtility.Unzip(this.GetClaimValue(jsonToken.Claims, TokenClaims.Api))),
+                Modules = JsonUtility.Deserialize<IList<string>>(GzipUtility.Unzip(this.GetClaimValue(jsonToken.Claims, TokenClaims.Module)))
             };
         }
 

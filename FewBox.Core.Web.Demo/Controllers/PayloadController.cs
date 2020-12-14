@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Security.Claims;
-using FewBox.Core.Utility.Compress;
-using FewBox.Core.Utility.Formatter;
 using FewBox.Core.Web.Config;
 using FewBox.Core.Web.Dto;
 using FewBox.Core.Web.Token;
@@ -41,8 +38,8 @@ namespace FewBox.Core.Web.Demo.Controllers
                 Issuer = this.FewBoxConfig.JWT.Issuer,
                 Audience = this.FewBoxConfig.JWT.Audience,
                 Roles = new List<string> { "Admin" },
-                GzipApis = GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(apis)),
-                GzipModules = GzipUtility.Zip(JsonUtility.Serialize<IList<string>>(modules))
+                Apis = apis,
+                Modules = modules
             };
             var expires = DateTime.Now.AddMinutes(1);
             string token = this.TokenService.GenerateToken(userProfile, expires);
