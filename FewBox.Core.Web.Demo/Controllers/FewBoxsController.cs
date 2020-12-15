@@ -9,7 +9,7 @@ namespace FewBox.Core.Web.Demo.Controllers
 {
     [ApiController]
     [Route("api/v{v:apiVersion}/[controller]")]
-    [Authorize(Policy="JWTRole_ControllerAction")]
+    [Authorize(Policy="JWTPayload_ControllerAction")]
     public class FewBoxsController : ResourcesController<IFewBoxRepository, Repositories.FewBox, FewBoxDto, PersistenceFewBoxDto>
     {
         public FewBoxsController(IFewBoxRepository repository, IMapper mapper) : base(repository, mapper)

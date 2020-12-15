@@ -50,16 +50,23 @@ namespace FewBox.Core.Web.Security
                         string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
                         string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
                         doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{service}/{controller}/{action}".ToLower()) > 0 : false;
-                        using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
+                        if (doesUserHavePermission)
                         {
-                            foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                            using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
                             {
-                                this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
+                                foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                                {
+                                    this.Logger.LogDebug($"Header: {header.Key} - {header.Value}");
+                                }
+                                foreach (var claim in context.User.Claims)
+                                {
+                                    this.Logger.LogDebug($"Claim: {claim.Type}-{claim.Value}");
+                                }
                             }
-                            foreach (var claim in context.User.Claims)
-                            {
-                                this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
-                            }
+                        }
+                        else
+                        {
+                            this.Logger.LogDebug($"[False] {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
                         }
                     }
                 }
@@ -71,13 +78,12 @@ namespace FewBox.Core.Web.Security
                 {
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
-                    Console.WriteLine($"[False]{this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
                 }
             }
             else
             {
                 context.Fail();
-                Console.WriteLine($"[False]{this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                this.Logger.LogDebug($"[False] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }
