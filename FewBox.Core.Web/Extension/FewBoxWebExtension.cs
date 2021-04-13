@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System;
+using System.Linq;
 using Dapper;
 using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Utility.Formatter;
@@ -25,6 +26,9 @@ using FewBox.Core.Web.Orm;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using NSwag.Generation.AspNetCore;
+using NSwag.Generation.Processors.Security;
+using NSwag;
 
 namespace FewBox.Core.Web.Extension
 {
@@ -42,9 +46,8 @@ namespace FewBox.Core.Web.Extension
             Configuration = configuration;
         }
 
-        public static void AddFewBox(this IServiceCollection services, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, ApiVersion defaultVersion = default(ApiVersion), int responseCacheDuration = 3600)
+        public static void AddFewBox(this IServiceCollection services, IList<ApiVersionDocument> apiVersionDocuments, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, int responseCacheDuration = 3600)
         {
-
             var fewBoxConfig = Configuration.GetSection("FewBox").Get<FewBoxConfig>();
             services.AddSingleton(fewBoxConfig);
             // Init env.
@@ -184,7 +187,7 @@ namespace FewBox.Core.Web.Extension
                 options.ReportApiVersions = true; // Show versions in response.
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
-                options.DefaultApiVersion = defaultVersion == null ? ApiVersion.Default : defaultVersion; // new ApiVersion(1, 0, "alpha");
+                options.DefaultApiVersion = apiVersionDocuments.Where(apiVersionDocument => apiVersionDocument.IsDefault).SingleOrDefault().ApiVersion;
             });
             services.AddVersionedApiExplorer(options =>
             {
@@ -205,8 +208,16 @@ namespace FewBox.Core.Web.Extension
             {
                 services.AddSingleton<IOrmConfiguration, AppSettingOrmConfiguration>();
             }
+            // Used for Swagger Open Api Document.
+            foreach (var doc in GetDocs(apiVersionDocuments))
+            {
+                services.AddOpenApiDocument(config =>
+                {
+                    InitAspNetCoreOpenApiDocumentGeneratorSettings(config, doc.Version, doc.ApiGroupNames, doc.Version);
+                });
+            }
         }
-        public static void UseFewBox(this IApplicationBuilder app, IList<string> documentPaths)
+        public static void UseFewBox(this IApplicationBuilder app, IList<ApiVersionDocument> apiVersionDocuments)
         {
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -217,8 +228,9 @@ namespace FewBox.Core.Web.Extension
             if (WebHostEnvironment.IsProduction() || WebHostEnvironment.IsStaging())
             {
                 app.UseCors();
-                foreach (string documentPath in documentPaths)
+                foreach (var doc in GetDocs(apiVersionDocuments))
                 {
+                    string documentPath = $"/swagger/{doc.Version}/swagger.json";
                     app.UseReDoc(c => c.DocumentPath = documentPath);
                 }
                 app.UseHsts();
@@ -240,6 +252,66 @@ namespace FewBox.Core.Web.Extension
                     endpoints.MapControllers();
                 }
             });
+        }
+
+        private static void InitAspNetCoreOpenApiDocumentGeneratorSettings(AspNetCoreOpenApiDocumentGeneratorSettings config, string documentName, IList<string> apiGroupNames, string documentVersion)
+        {
+            config.DocumentName = documentName;
+            config.ApiGroupNames = apiGroupNames.ToArray();
+            config.PostProcess = document =>
+            {
+                InitDocumentInfo(document, documentVersion);
+            };
+            config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT"));
+            config.DocumentProcessors.Add(
+                new SecurityDefinitionAppender("JWT", new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    Description = "Bearer [Token]",
+                    In = OpenApiSecurityApiKeyLocation.Header
+                })
+            );
+        }
+
+        private static void InitDocumentInfo(OpenApiDocument document, string version)
+        {
+            document.Info.Version = version;
+            document.Info.Title = "FewBox Api";
+            document.Info.Description = "FewBox Api for more information please visit the 'https://fewbox.com'";
+            document.Info.TermsOfService = "https://fewbox.com/terms";
+            document.Info.Contact = new OpenApiContact
+            {
+                Name = "FewBox",
+                Email = "support@fewbox.com",
+                Url = "https://fewbox.com/support"
+            };
+            document.Info.License = new OpenApiLicense
+            {
+                Name = "Use under license",
+                Url = "https://fewbox.com/license"
+            };
+        }
+
+        private static IList<Doc> GetDocs(IList<ApiVersionDocument> apiVersionDocuments)
+        {
+            return apiVersionDocuments.GroupBy(apiVersionDocument => apiVersionDocument.ApiVersion.MajorVersion).Select(
+                group =>
+                {
+                    var versions = group.Select(apiVersionDocument => $"{apiVersionDocument.ApiVersion.MajorVersion}-{apiVersionDocument.ApiVersion.Status}".TrimEnd('-')).ToList();
+                    return new Doc
+                    {
+                        Version = $"v{group.First().ApiVersion.MajorVersion}",
+                        ApiGroupNames = versions
+                    };
+                }
+                ).ToList();
+        }
+
+        private class Doc
+        {
+            public string Version { get; set; }
+            public IList<string> ApiGroupNames { get; set; }
         }
     }
 }
