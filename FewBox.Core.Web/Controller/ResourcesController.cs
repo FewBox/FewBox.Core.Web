@@ -124,6 +124,7 @@ namespace FewBox.Core.Web.Controller
         public virtual MetaResponseDto Patch(Guid id, [FromBody]JsonPatchDocument<E> jsonPatchDocument)
         {
             /*
+            Note: application/json-patch+json !!!
             [
                 { "op": "replace", "path": "/Name", "value": "FewBox & Landpy" },
             ]

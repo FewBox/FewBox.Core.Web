@@ -25,10 +25,11 @@ using FewBox.Core.Web.Sentry;
 using FewBox.Core.Web.Orm;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using NSwag;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
 
 namespace FewBox.Core.Web.Extension
 {
@@ -48,6 +49,13 @@ namespace FewBox.Core.Web.Extension
 
         public static void AddFewBox(this IServiceCollection services, IList<ApiVersionDocument> apiVersionDocuments, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, int responseCacheDuration = 3600)
         {
+            // Support Json Patch
+            // services.AddControllersWithViews().AddNewtonsoftJson();
+            services.AddControllersWithViews(options =>
+            {
+                options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+            });
+            // Config
             var fewBoxConfig = Configuration.GetSection("FewBox").Get<FewBoxConfig>();
             services.AddSingleton(fewBoxConfig);
             // Init env.
@@ -312,6 +320,22 @@ namespace FewBox.Core.Web.Extension
         {
             public string Version { get; set; }
             public IList<string> ApiGroupNames { get; set; }
+        }
+
+        private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
+        {
+            var builder = new ServiceCollection()
+                .AddLogging()
+                .AddMvc()
+                .AddNewtonsoftJson()
+                .Services.BuildServiceProvider();
+
+            return builder
+                .GetRequiredService<IOptions<MvcOptions>>()
+                .Value
+                .InputFormatters
+                .OfType<NewtonsoftJsonPatchInputFormatter>()
+                .First();
         }
     }
 }
