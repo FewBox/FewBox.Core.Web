@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.JsonPatch;
+using FewBox.Core.Web.Token;
 
 namespace FewBox.Core.Web.Controller
 {
@@ -13,10 +14,12 @@ namespace FewBox.Core.Web.Controller
     [ApiController]
     public abstract class ResourcesController<RI, E, D, PD> : MapperController where E : Entity where RI : IRepository<E>
     {
+        private ITokenService TokenService { get; set; }
         protected RI Repository { get; set; }
-        protected ResourcesController(RI repository, IMapper mapper) : base(mapper)
+        protected ResourcesController(RI repository, ITokenService tokenService, IMapper mapper) : base(mapper)
         {
             this.Repository = repository;
+            this.TokenService = tokenService;
         }
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace FewBox.Core.Web.Controller
         /// <returns>Id payload.</returns>
         [HttpPost]
         [Transaction]
-        public virtual PayloadResponseDto<Guid> Post([FromBody]PD persistenceDto)
+        public virtual PayloadResponseDto<Guid> Post([FromBody] PD persistenceDto)
         {
             Guid id = this.Repository.Save(this.Mapper.Map<PD, E>(persistenceDto));
             return new PayloadResponseDto<Guid>
@@ -102,7 +105,7 @@ namespace FewBox.Core.Web.Controller
         /// <returns>Effect rows.</returns>
         [HttpPut("{id}")]
         [Transaction]
-        public virtual PayloadResponseDto<int> Put(Guid id, [FromBody]PD persistenceDto)
+        public virtual PayloadResponseDto<int> Put(Guid id, [FromBody] PD persistenceDto)
         {
             E entity = this.Mapper.Map<PD, E>(persistenceDto);
             entity.Id = id;
@@ -121,7 +124,7 @@ namespace FewBox.Core.Web.Controller
         /// <returns>Empty.</returns>
         [HttpPatch("{id}")]
         [Transaction]
-        public virtual MetaResponseDto Patch(Guid id, [FromBody]JsonPatchDocument<E> jsonPatchDocument)
+        public virtual MetaResponseDto Patch(Guid id, [FromBody] JsonPatchDocument<E> jsonPatchDocument)
         {
             /*
             Note: application/json-patch+json !!!
@@ -152,6 +155,106 @@ namespace FewBox.Core.Web.Controller
             {
                 Payload = effect
             };
+        }
+
+        /// <summary>
+        /// Update whole resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <param name="persistenceDto">Resource.</param>
+        /// <returns>Effect rows.</returns>
+        [HttpPut("{id}/owner")]
+        [Transaction]
+        public virtual PayloadResponseDto<int> PutOwner(Guid id, [FromBody] PD persistenceDto)
+        {
+            int effect = -1;
+            if (this.VerifyOwner(id))
+            {
+                E entity = this.Mapper.Map<PD, E>(persistenceDto);
+                entity.Id = id;
+                effect = this.Repository.Update(entity);
+            }
+            else
+            {
+                this.HttpContext.Response.StatusCode = 403;
+            }
+            return new PayloadResponseDto<int>
+            {
+                Payload = effect
+            };
+        }
+
+        /// <summary>
+        /// Update part resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <param name="jsonPatchDocument">Json patch document.</param>
+        /// <returns>Empty.</returns>
+        [HttpPatch("{id}/owner")]
+        [Transaction]
+        public virtual MetaResponseDto PatchOwner(Guid id, [FromBody] JsonPatchDocument<E> jsonPatchDocument)
+        {
+            /*
+            Note: application/json-patch+json !!!
+            [
+                { "op": "replace", "path": "/Name", "value": "FewBox & Landpy" },
+            ]
+            */
+            int effect = -1;
+            if (this.VerifyOwner(id))
+            {
+                E theEntity = this.Repository.FindOne(id);
+                jsonPatchDocument.ApplyTo(theEntity);
+                effect = this.Repository.Update(theEntity);
+            }
+            else
+            {
+                this.HttpContext.Response.StatusCode = 403;
+            }
+            return new PayloadResponseDto<int>
+            {
+                Payload = effect
+            };
+        }
+
+        /// <summary>
+        /// Delete resource.
+        /// </summary>
+        /// <param name="id">Id.</param>
+        /// <returns>Effect rows.</returns>
+        [HttpDelete("{id}/owner")]
+        [Transaction]
+        public virtual PayloadResponseDto<int> DeleteOwner(Guid id)
+        {
+            int effect = -1;
+            if (this.VerifyOwner(id))
+            {
+                effect = this.Repository.Recycle(id);
+            }
+            else
+            {
+                this.HttpContext.Response.StatusCode = 403;
+            }
+            return new PayloadResponseDto<int>
+            {
+                Payload = effect
+            };
+        }
+
+        private bool VerifyOwner(Guid resourceId)
+        {
+            var resource = this.Repository.FindOne(resourceId);
+            if (resource != null)
+            {
+                string authorization = this.HttpContext.Request.Headers["Authorization"];
+                string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+                string userId = this.TokenService.GetUserIdByToken(token);
+                return userId.Equals(resource.CreatedBy.ToString(), StringComparison.CurrentCultureIgnoreCase);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
