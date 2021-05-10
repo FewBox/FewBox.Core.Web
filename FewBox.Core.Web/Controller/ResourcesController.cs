@@ -15,10 +15,9 @@ namespace FewBox.Core.Web.Controller
     public abstract class ResourcesController<RI, E, D, PD> : MapperController where E : Entity where RI : IRepository<E>
     {
         protected RI Repository { get; set; }
-        protected ResourcesController(RI repository, ITokenService tokenService, IMapper mapper) : base(tokenService, mapper)
+        protected ResourcesController(RI repository, ITokenService tokenService, IMapper mapper) : base(mapper, tokenService)
         {
             this.Repository = repository;
-            this.TokenService = tokenService;
         }
 
         /// <summary>
