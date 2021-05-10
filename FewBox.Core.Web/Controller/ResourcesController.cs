@@ -14,9 +14,8 @@ namespace FewBox.Core.Web.Controller
     [ApiController]
     public abstract class ResourcesController<RI, E, D, PD> : MapperController where E : Entity where RI : IRepository<E>
     {
-        private ITokenService TokenService { get; set; }
         protected RI Repository { get; set; }
-        protected ResourcesController(RI repository, ITokenService tokenService, IMapper mapper) : base(mapper)
+        protected ResourcesController(RI repository, ITokenService tokenService, IMapper mapper) : base(tokenService, mapper)
         {
             this.Repository = repository;
             this.TokenService = tokenService;
@@ -241,14 +240,17 @@ namespace FewBox.Core.Web.Controller
             };
         }
 
-        private bool VerifyOwner(Guid resourceId)
+        protected bool VerifyOwner(Guid resourceId)
         {
-            var resource = this.Repository.FindOne(resourceId);
+            return this.VerifyOwner(this.Repository, resourceId);
+        }
+
+        protected bool VerifyOwner(RI repository, Guid resourceId)
+        {
+            var resource = repository.FindOne(resourceId);
             if (resource != null)
             {
-                string authorization = this.HttpContext.Request.Headers["Authorization"];
-                string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
-                string userId = this.TokenService.GetUserIdByToken(token);
+                string userId = this.GetUserId();
                 return userId.Equals(resource.CreatedBy.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
             else
