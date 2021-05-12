@@ -28,8 +28,14 @@ namespace FewBox.Core.Web.Controller
             {
                 string authorization = this.HttpContext.Request.Headers["Authorization"];
                 string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
-                string userId = this.TokenService.GetUserIdByToken(token);
-                return userId;
+                if (token != null)
+                {
+                    return this.TokenService.GetUserIdByToken(token);
+                }
+                else
+                {
+                    return String.Empty;
+                }
             }
             else
             {
