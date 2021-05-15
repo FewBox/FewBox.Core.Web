@@ -30,6 +30,7 @@ using NSwag.Generation.Processors.Security;
 using NSwag;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace FewBox.Core.Web.Extension
 {
@@ -298,6 +299,10 @@ namespace FewBox.Core.Web.Extension
             {
                 Name = "Use under license",
                 Url = "https://fewbox.com/license"
+            };
+            string service = Assembly.GetEntryAssembly().GetName().Name;
+            document.Info.ExtensionData = new Dictionary<string, object> {
+                {"Service", service}
             };
         }
 
