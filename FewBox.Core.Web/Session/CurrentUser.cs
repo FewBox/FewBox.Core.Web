@@ -2,25 +2,30 @@ using System.Linq;
 using FewBox.Core.Persistence.Orm;
 using Microsoft.AspNetCore.Http;
 using FewBox.Core.Utility.Converter;
+using System;
 
 namespace FewBox.Core.Web.Token
 {
     public class CurrentUser<T> : ICurrentUser<T>
     {
         private IHttpContextAccessor HttpContextAccessor { get; set; }
-        public CurrentUser(IHttpContextAccessor httpContextAccessor)
+        private ITokenService TokenService { get; set; }
+        public CurrentUser(IHttpContextAccessor httpContextAccessor, ITokenService tokenService)
         {
             this.HttpContextAccessor = httpContextAccessor;
+            this.TokenService = tokenService;
         }
         public T GetId()
         {
             T id = default(T);
             if (this.HttpContextAccessor.HttpContext != null)
             {
-                var claim = this.HttpContextAccessor.HttpContext.User.Claims.Where(p => p.Type == TokenClaims.Id).FirstOrDefault();
-                if (claim != null)
+                string authorization = this.HttpContextAccessor.HttpContext.Request.Query["access_token"].Count > 0 ? this.HttpContextAccessor.HttpContext.Request.Query["access_token"] : this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
+                if (!String.IsNullOrEmpty(authorization))
                 {
-                    id = TypeUtility.Converte<T>(claim.Value);
+                    string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+                    var userProfile = this.TokenService.GetUserProfileByToken(token);
+                    id = TypeUtility.Converte<T>(userProfile.Id);
                 }
             }
             return id;
