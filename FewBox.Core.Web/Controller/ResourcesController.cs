@@ -4,6 +4,7 @@ using FewBox.Core.Persistence.Orm;
 using FewBox.Core.Web.Dto;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using FewBox.Core.Web.Filter;
 using Microsoft.AspNetCore.JsonPatch;
 using FewBox.Core.Web.Token;
@@ -47,6 +48,34 @@ namespace FewBox.Core.Web.Controller
         }
 
         /// <summary>
+        /// Get all resources.
+        /// </summary>
+        /// <returns>All resources.</returns>
+        [HttpGet("sigleorder")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderBy([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto)
+        {
+            OrderType orderType = (OrderType)orderTypeDto;
+            return new PayloadResponseDto<IEnumerable<D>>
+            {
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(fields, orderType))
+            };
+        }
+
+        /// <summary>
+        /// Get all resources.
+        /// </summary>
+        /// <returns>All resources.</returns>
+        [HttpGet("multipleorder")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderBy([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos)
+        {
+            var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
+            return new PayloadResponseDto<IEnumerable<D>>
+            {
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(fieldOrders))
+            };
+        }
+
+        /// <summary>
         /// Get resources by paging.
         /// </summary>
         /// <param name="pageIndex">Page index.</param>
@@ -60,6 +89,49 @@ namespace FewBox.Core.Web.Controller
                 Payload = new PagingDto<D>
                 {
                     Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAll(pageIndex, pageRange)),
+                    PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
+        /// <param name="fields">Fiels.</param>
+        /// <param name="orderTypeDto">Order type.</param>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
+        [HttpGet("paging/sigleorder")]
+        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto, int pageIndex = 1, int pageRange = 5)
+        {
+            OrderType orderType = (OrderType)orderTypeDto;
+            return new PayloadResponseDto<PagingDto<D>>
+            {
+                Payload = new PagingDto<D>
+                {
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(pageIndex, pageRange, fields, orderType)),
+                    PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
+        /// <param name="fieldOrderDtos">Field orders.</param>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
+        [HttpGet("paging/multipleorder")]
+        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos, int pageIndex = 1, int pageRange = 5)
+        {
+            var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
+            return new PayloadResponseDto<PagingDto<D>>
+            {
+                Payload = new PagingDto<D>
+                {
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(pageIndex, pageRange, fieldOrders)),
                     PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
                 }
             };
