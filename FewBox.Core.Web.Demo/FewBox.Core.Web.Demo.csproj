@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.41" />
+    <PackageReference Include="FewBox.Core.Persistence" Version="1.0.43" />
     <PackageReference Include="FewBox.Core.Utility" Version="1.0.32" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />

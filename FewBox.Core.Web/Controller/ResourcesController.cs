@@ -35,11 +35,24 @@ namespace FewBox.Core.Web.Controller
         }
 
         /// <summary>
+        /// Get resources count. 
+        /// </summary>
+        /// <returns>Resouces count.</returns>
+        [HttpGet("count/owner")]
+        public virtual PayloadResponseDto<int> GetOwnerCount()
+        {
+            return new PayloadResponseDto<int>
+            {
+                Payload = this.Repository.CountByCreatedBy(this.GetUserId())
+            };
+        }
+
+        /// <summary>
         /// Get all resources.
         /// </summary>
         /// <returns>All resources.</returns>
         [HttpGet]
-        public virtual PayloadResponseDto<IEnumerable<D>> Get()
+        public virtual PayloadResponseDto<IEnumerable<D>> GetAll()
         {
             return new PayloadResponseDto<IEnumerable<D>>
             {
@@ -51,13 +64,12 @@ namespace FewBox.Core.Web.Controller
         /// Get all resources.
         /// </summary>
         /// <returns>All resources.</returns>
-        [HttpGet("sigleorder")]
-        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderBy([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto)
+        [HttpGet("owner")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOwnerAll()
         {
-            OrderType orderType = (OrderType)orderTypeDto;
             return new PayloadResponseDto<IEnumerable<D>>
             {
-                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(fields, orderType))
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId()))
             };
         }
 
@@ -65,13 +77,50 @@ namespace FewBox.Core.Web.Controller
         /// Get all resources.
         /// </summary>
         /// <returns>All resources.</returns>
+        [HttpGet("sigleorder")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderByAll([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto)
+        {
+            OrderType orderType = (OrderType)orderTypeDto;
+            return new PayloadResponseDto<IEnumerable<D>>
+            {
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAll(fields, orderType))
+            };
+        }
+
+        [HttpGet("sigleorder/owner")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOwnerOrderByAll([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto)
+        {
+            OrderType orderType = (OrderType)orderTypeDto;
+            return new PayloadResponseDto<IEnumerable<D>>
+            {
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId(), fields, orderType))
+            };
+        }
+        /// <summary>
+        /// Get all resources.
+        /// </summary>
+        /// <returns>All resources.</returns>
         [HttpGet("multipleorder")]
-        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderBy([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos)
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOrderByAll([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos)
         {
             var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
             return new PayloadResponseDto<IEnumerable<D>>
             {
-                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(fieldOrders))
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAll(fieldOrders))
+            };
+        }
+
+        /// <summary>
+        /// Get all resources.
+        /// </summary>
+        /// <returns>All resources.</returns>
+        [HttpGet("multipleorder/owner")]
+        public virtual PayloadResponseDto<IEnumerable<D>> GetOwnerOrderByAll([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos)
+        {
+            var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
+            return new PayloadResponseDto<IEnumerable<D>>
+            {
+                Payload = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId(), fieldOrders))
             };
         }
 
@@ -82,7 +131,7 @@ namespace FewBox.Core.Web.Controller
         /// <param name="pageRange">Page range.</param>
         /// <returns>Paging resources.</returns>
         [HttpGet("paging")]
-        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] int pageIndex = 1, int pageRange = 5)
+        public virtual PayloadResponseDto<PagingDto<D>> GetPagingAll([FromQuery] int pageIndex = 1, int pageRange = 5)
         {
             return new PayloadResponseDto<PagingDto<D>>
             {
@@ -97,20 +146,61 @@ namespace FewBox.Core.Web.Controller
         /// <summary>
         /// Get resources by paging.
         /// </summary>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
+        [HttpGet("paging/owner")]
+        public virtual PayloadResponseDto<PagingDto<D>> GetOwnerPagingAll([FromQuery] int pageIndex = 1, int pageRange = 5)
+        {
+            return new PayloadResponseDto<PagingDto<D>>
+            {
+                Payload = new PagingDto<D>
+                {
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId(), pageIndex, pageRange)),
+                    PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
         /// <param name="fields">Fiels.</param>
         /// <param name="orderTypeDto">Order type.</param>
         /// <param name="pageIndex">Page index.</param>
         /// <param name="pageRange">Page range.</param>
         /// <returns>Paging resources.</returns>
         [HttpGet("paging/sigleorder")]
-        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto, int pageIndex = 1, int pageRange = 5)
+        public virtual PayloadResponseDto<PagingDto<D>> GetPagingOrderAll([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto, int pageIndex = 1, int pageRange = 5)
         {
             OrderType orderType = (OrderType)orderTypeDto;
             return new PayloadResponseDto<PagingDto<D>>
             {
                 Payload = new PagingDto<D>
                 {
-                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(pageIndex, pageRange, fields, orderType)),
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAll(pageIndex, pageRange, fields, orderType)),
+                    PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
+        /// <param name="fields">Fiels.</param>
+        /// <param name="orderTypeDto">Order type.</param>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
+        [HttpGet("paging/sigleorder/owner")]
+        public virtual PayloadResponseDto<PagingDto<D>> GetOwnerPagingOrderAll([FromQuery] IEnumerable<string> fields, OrderTypeDto orderTypeDto, int pageIndex = 1, int pageRange = 5)
+        {
+            OrderType orderType = (OrderType)orderTypeDto;
+            return new PayloadResponseDto<PagingDto<D>>
+            {
+                Payload = new PagingDto<D>
+                {
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId(), pageIndex, pageRange, fields, orderType)),
                     PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
                 }
             };
@@ -124,14 +214,35 @@ namespace FewBox.Core.Web.Controller
         /// <param name="pageRange">Page range.</param>
         /// <returns>Paging resources.</returns>
         [HttpGet("paging/multipleorder")]
-        public virtual PayloadResponseDto<PagingDto<D>> Get([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos, int pageIndex = 1, int pageRange = 5)
+        public virtual PayloadResponseDto<PagingDto<D>> GetPagingOrderAll([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos, int pageIndex = 1, int pageRange = 5)
         {
             var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
             return new PayloadResponseDto<PagingDto<D>>
             {
                 Payload = new PagingDto<D>
                 {
-                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllOrderBy(pageIndex, pageRange, fieldOrders)),
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAll(pageIndex, pageRange, fieldOrders)),
+                    PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Get resources by paging.
+        /// </summary>
+        /// <param name="fieldOrderDtos">Field orders.</param>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageRange">Page range.</param>
+        /// <returns>Paging resources.</returns>
+        [HttpGet("paging/multipleorder/owner")]
+        public virtual PayloadResponseDto<PagingDto<D>> GetOwnerPagingOrderAll([FromQuery] IDictionary<string, OrderTypeDto> fieldOrderDtos, int pageIndex = 1, int pageRange = 5)
+        {
+            var fieldOrders = fieldOrderDtos.ToDictionary(d => d.Key, d => (OrderType)d.Value);
+            return new PayloadResponseDto<PagingDto<D>>
+            {
+                Payload = new PagingDto<D>
+                {
+                    Items = this.Mapper.Map<IEnumerable<E>, IEnumerable<D>>(this.Repository.FindAllByCreatedBy(this.GetUserId(), pageIndex, pageRange, fieldOrders)),
                     PagingCount = (int)Math.Ceiling((double)this.Repository.Count() / pageRange)
                 }
             };
@@ -321,8 +432,7 @@ namespace FewBox.Core.Web.Controller
             var resource = repository.FindOne(resourceId);
             if (resource != null)
             {
-                string userId = this.GetUserId();
-                return userId.Equals(resource.CreatedBy.ToString(), StringComparison.CurrentCultureIgnoreCase);
+                return this.GetUserId() == resource.CreatedBy;
             }
             else
             {
