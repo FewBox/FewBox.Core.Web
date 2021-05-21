@@ -37,7 +37,6 @@ namespace FewBox.Core.Web.Security
             var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
             string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
             string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
-            this.Logger.LogError($"[FewBox] JWTPayload {service} {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
             if (!String.IsNullOrEmpty(token) && this.TokenService.ValidateToken(token, this.FewBoxConfig.JWT.Key, this.FewBoxConfig.JWT.Issuer, this.FewBoxConfig.JWT.Audience))
             {
                 bool doesUserHavePermission = false;
@@ -50,7 +49,14 @@ namespace FewBox.Core.Web.Security
                     var userProfile = this.TokenService.GetUserProfileByToken(token);
                     if (requirement != null)
                     {
-                        doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{service}/{controller}/{action}".ToLower()) > 0 : false;
+                        if (userProfile.Apis != null)
+                        {
+                            doesUserHavePermission = userProfile.Apis.Contains($"{service}/{controller}/{action}");
+                        }
+                        else
+                        {
+                            this.Logger.LogError("User Apis is null!");
+                        }
                     }
                     else
                     {
@@ -63,7 +69,7 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
-                    this.Logger.LogError($"[FewBox] JWTPayload {service} {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
+                    this.Logger.LogError($"[FewBox JWTPayload] {service} {controller} {action} {verb} {token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
                     /*using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))

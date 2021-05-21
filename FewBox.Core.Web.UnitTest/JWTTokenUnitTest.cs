@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Linq;
 
 namespace FewBox.Core.Core.UnitTest
 {
@@ -106,12 +107,17 @@ namespace FewBox.Core.Core.UnitTest
             });
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void TestTokenDecode()
         {
-            string authorization = "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSX1NoaXBwaW5nX1NVUFBFUkFETUlOIiwiaHR0cDovL3NjaGVtYXMuZmV3Ym94LmNvbS9qd3QvMjAxOS8wNC9pZGVudGl0eS9jbGFpbXMvaWQiOiIzZmM3YzhjOC03N2UyLTQyOTYtODMwYS1iM2FhZDdlYTkxYjAiLCJodHRwOi8vc2NoZW1hcy5mZXdib3guY29tL2p3dC8yMDE5LzA0L2lkZW50aXR5L2NsYWltcy9pc3N1ZXIiOiJodHRwczovL2Zld2JveC5jb20iLCJleHAiOjE1NzIxNTUxMzgsImlzcyI6Imh0dHBzOi8vZmV3Ym94LmNvbSIsImF1ZCI6Imh0dHBzOi8vZmV3Ym94LmNvbSJ9.n8E4WTP5ZldVFJM-wPvv1zvUJcteTAg3nOifhErWk_k";
+            string authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSX0ZFV0JPWC5TRVJWSUNFLkxPV0NPREUuTElOS19GUkVFIiwiaHR0cDovL3NjaGVtYXMuZmV3Ym94LmNvbS9qd3QvaWRlbnRpdHkvY2xhaW1zL2FwaSI6Ikg0c0lBQUFBQUFBQUE1M1F3UTZDTUF3RzRIZmhiT0FaVk1TWW1FaUNub3d4Yy95T3hVSEoxamg4ZTZmY3hYRnFELzNTOWo4bkJmeUtoclNDZldxSmRFOStUWFdvdW50a3gxZFB5b3ErMFhEWkZsd0twVHUxTkNaWi9IWU4yamh4Y3JEWDB0SmRtd0JMd2JJNStBNzJIMWFCT1N5Wno4aHgxSG5ocjUzYkROcXhtM0FWazhYY0ZFY2NIV1dPbGo3TkYwMlBGMEI5RXpLTTV6QmdqUGxkM3NoWkx2UVpBZ0FBIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbW9iaWxlcGhvbmUiOiIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoieWlsIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoibWFya2V0aW5nQHlpbC5pbmsiLCJodHRwOi8vc2NoZW1hcy5mZXdib3guY29tL2p3dC9pZGVudGl0eS9jbGFpbXMvdGVuYW50IjoibWFya2V0aW5nQHlpbC5pbmsiLCJodHRwOi8vc2NoZW1hcy5mZXdib3guY29tL2p3dC9pZGVudGl0eS9jbGFpbXMvaWQiOiIzNzIwYTk2NC1iOGIxLTQwMjUtYmViMS1hMTFkMDA3ZWM5ZTMiLCJodHRwOi8vc2NoZW1hcy5mZXdib3guY29tL2p3dC9pZGVudGl0eS9jbGFpbXMvaXNzdWVyIjoiaHR0cHM6Ly9mZXdib3guY29tIiwiaHR0cDovL3NjaGVtYXMuZmV3Ym94LmNvbS9qd3QvaWRlbnRpdHkvY2xhaW1zL2F1ZGllbmNlIjoiaHR0cHM6Ly9mZXdib3guY29tIiwiZXhwIjoxNjIxNjE1NzM3LCJpc3MiOiJodHRwczovL2Zld2JveC5jb20iLCJhdWQiOiJodHRwczovL2Zld2JveC5jb20ifQ.OAKxJFjjfWvUaHYq6t4PClEXUCs2MZChuGESMYysWEw";
             string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
-            var userInfo = this.TokenService.GetUserProfileByToken(token);
+            var userProfile = this.TokenService.GetUserProfileByToken(token);
+            string service = "FewBox.Service.LowCode.Link";
+            string controller = "Feedbacks";
+            string action = "DeleteOwner";
+            bool doesUserHavePermission = userProfile.Apis.Contains($"{service}/{controller}/{action}");
+            Assert.IsTrue(doesUserHavePermission);
         }
 
         //[TestMethod]
