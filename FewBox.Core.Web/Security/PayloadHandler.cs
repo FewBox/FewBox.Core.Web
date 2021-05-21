@@ -33,11 +33,14 @@ namespace FewBox.Core.Web.Security
             string authorization = this.HttpContextAccessor.HttpContext.Request.Query["access_token"].Count > 0 ?
             this.HttpContextAccessor.HttpContext.Request.Query["access_token"] : this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
             string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+            string service = Assembly.GetEntryAssembly().GetName().Name;
+            var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
+            string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
+            string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
+            this.Logger.LogError($"[FewBox] JWTPayload {service} {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
             if (!String.IsNullOrEmpty(token) && this.TokenService.ValidateToken(token, this.FewBoxConfig.JWT.Key, this.FewBoxConfig.JWT.Issuer, this.FewBoxConfig.JWT.Audience))
             {
                 bool doesUserHavePermission = false;
-                string controller = "Unknown";
-                string action = "Unknown";
                 if (verb == HttpMethods.Options)
                 {
                     doesUserHavePermission = true;
@@ -47,10 +50,6 @@ namespace FewBox.Core.Web.Security
                     var userProfile = this.TokenService.GetUserProfileByToken(token);
                     if (requirement != null)
                     {
-                        string service = Assembly.GetEntryAssembly().GetName().Name;
-                        var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
-                        controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
-                        action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
                         doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{service}/{controller}/{action}".ToLower()) > 0 : false;
                     }
                     else
@@ -64,7 +63,7 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
-                    this.Logger.LogError($"{controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
+                    this.Logger.LogError($"[FewBox] JWTPayload {service} {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
                     /*using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
