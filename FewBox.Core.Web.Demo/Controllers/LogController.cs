@@ -19,7 +19,7 @@ namespace FewBox.Core.Web.Demo.Controllers
         [HttpPost]
         public MetaResponseDto Post(TraceDto trace)
         {
-            this.Logger.LogTrace(trace.Content);
+            this.Logger.LogError(trace.Content);
             return new MetaResponseDto();
         }
     }
