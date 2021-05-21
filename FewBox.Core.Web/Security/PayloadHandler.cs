@@ -36,6 +36,8 @@ namespace FewBox.Core.Web.Security
             if (!String.IsNullOrEmpty(token) && this.TokenService.ValidateToken(token, this.FewBoxConfig.JWT.Key, this.FewBoxConfig.JWT.Issuer, this.FewBoxConfig.JWT.Audience))
             {
                 bool doesUserHavePermission = false;
+                string controller = "Unknown";
+                string action = "Unknown";
                 if (verb == HttpMethods.Options)
                 {
                     doesUserHavePermission = true;
@@ -47,27 +49,13 @@ namespace FewBox.Core.Web.Security
                     {
                         string service = Assembly.GetEntryAssembly().GetName().Name;
                         var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
-                        string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
-                        string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
+                        controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
+                        action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
                         doesUserHavePermission = userProfile.Apis != null ? userProfile.Apis.Count(a => a.ToLower() == $"{service}/{controller}/{action}".ToLower()) > 0 : false;
-                        if (doesUserHavePermission)
-                        {
-                            using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
-                            {
-                                foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
-                                {
-                                    this.Logger.LogDebug($"Header: {header.Key} - {header.Value}");
-                                }
-                                foreach (var claim in context.User.Claims)
-                                {
-                                    this.Logger.LogDebug($"Claim: {claim.Type}-{claim.Value}");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            this.Logger.LogDebug($"[False] {controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
-                        }
+                    }
+                    else
+                    {
+                        this.Logger.LogWarning("PayloadRequirement is null!");
                     }
                 }
                 if (doesUserHavePermission)
@@ -78,12 +66,24 @@ namespace FewBox.Core.Web.Security
                 {
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
+                    using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
+                    {
+                        this.Logger.LogWarning($"{controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                        foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                        {
+                            this.Logger.LogDebug($"Header: {header.Key} - {header.Value}");
+                        }
+                        foreach (var claim in context.User.Claims)
+                        {
+                            this.Logger.LogDebug($"Claim: {claim.Type}-{claim.Value}");
+                        }
+                    }
                 }
             }
             else
             {
                 context.Fail();
-                this.Logger.LogDebug($"[False] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                this.Logger.LogWarning($"[FewBox] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }

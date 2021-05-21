@@ -17,13 +17,15 @@ namespace FewBox.Core.Web.Security
         private ITokenService TokenService { get; set; }
         private IHttpContextAccessor HttpContextAccessor { get; set; }
         private ILogger<RoleHandler> Logger { get; set; }
+        private FewBoxConfig FewBoxConfig { get; set; }
 
-        public RoleHandler(IAuthService authService, ITokenService tokenService, IHttpContextAccessor httpContextAccessor, ILogger<RoleHandler> logger)
+        public RoleHandler(IAuthService authService, ITokenService tokenService, IHttpContextAccessor httpContextAccessor, ILogger<RoleHandler> logger, FewBoxConfig fewBoxConfig)
         {
             this.AuthService = authService;
             this.TokenService = tokenService;
             this.HttpContextAccessor = httpContextAccessor;
             this.Logger = logger;
+            this.FewBoxConfig = fewBoxConfig;
         }
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
@@ -31,17 +33,18 @@ namespace FewBox.Core.Web.Security
             string verb = this.HttpContextAccessor.HttpContext.Request.Method;
             string authorization = this.HttpContextAccessor.HttpContext.Request.Query["access_token"].Count > 0 ?
             this.HttpContextAccessor.HttpContext.Request.Query["access_token"] : this.HttpContextAccessor.HttpContext.Request.Headers["Authorization"];
-
-            bool doesUserHavePermission = false;
-            if (verb == HttpMethods.Options)
+            string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+            if (!String.IsNullOrEmpty(token) && this.TokenService.ValidateToken(token, this.FewBoxConfig.JWT.Key, this.FewBoxConfig.JWT.Issuer, this.FewBoxConfig.JWT.Audience))
             {
-                doesUserHavePermission = true;
-            }
-            else
-            {
-                if (!String.IsNullOrEmpty(authorization))
+                bool doesUserHavePermission = false;
+                string controller = "Unknown";
+                string action = "Unknown";
+                if (verb == HttpMethods.Options)
                 {
-                    string token = authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
+                    doesUserHavePermission = true;
+                }
+                else
+                {
                     var userProfile = this.TokenService.GetUserProfileByToken(token);
                     if (requirement != null)
                     {
@@ -49,20 +52,9 @@ namespace FewBox.Core.Web.Security
                         if (requirement.FewBoxPolicyType == FewBoxPolicyType.ControllerAction)
                         {
                             var routeData = this.HttpContextAccessor.HttpContext.GetRouteData();
-                            string controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
-                            string action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
+                            controller = routeData.Values["controller"] != null ? routeData.Values["controller"].ToString() : null;
+                            action = routeData.Values["action"] != null ? routeData.Values["action"].ToString() : null;
                             doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, controller, action, userProfile.Roles);
-                            using (this.Logger.BeginScope($"Controller: {controller} Action: {action} Method: {verb}"))
-                            {
-                                foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
-                                {
-                                    this.Logger.LogTrace($"Header: {header.Key} - {header.Value}");
-                                }
-                                foreach (var claim in context.User.Claims)
-                                {
-                                    this.Logger.LogTrace($"Claim: {claim.Type}-{claim.Value}");
-                                }
-                            }
                         }
                         else if (requirement.FewBoxPolicyType == FewBoxPolicyType.Verb)
                         {
@@ -74,15 +66,37 @@ namespace FewBox.Core.Web.Security
                             doesUserHavePermission = this.AuthService.DoesUserHavePermission(serviceName, AuthCodeType.Hub, hub, userProfile.Roles);
                         }
                     }
+                    else
+                    {
+                        this.Logger.LogWarning("RoleRequirement is null!");
+                    }
                 }
-            }
-            if (doesUserHavePermission)
-            {
-                context.Succeed(requirement);
+                if (doesUserHavePermission)
+                {
+                    context.Succeed(requirement);
+                }
+                else
+                {
+                    this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
+                    context.Fail();
+                    using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
+                    {
+                        this.Logger.LogWarning($"{controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                        foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
+                        {
+                            this.Logger.LogDebug($"Header: {header.Key} - {header.Value}");
+                        }
+                        foreach (var claim in context.User.Claims)
+                        {
+                            this.Logger.LogDebug($"Claim: {claim.Type}-{claim.Value}");
+                        }
+                    }
+                }
             }
             else
             {
-                Console.WriteLine($"[False]{this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                context.Fail();
+                this.Logger.LogWarning($"[FewBox] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }
