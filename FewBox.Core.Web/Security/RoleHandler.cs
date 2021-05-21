@@ -68,7 +68,7 @@ namespace FewBox.Core.Web.Security
                     }
                     else
                     {
-                        this.Logger.LogWarning("RoleRequirement is null!");
+                        this.Logger.LogError("RoleRequirement is null!");
                     }
                 }
                 if (doesUserHavePermission)
@@ -77,9 +77,10 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
+                    this.Logger.LogError($"{controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
-                    using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
+                    /*using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
                     {
                         this.Logger.LogWarning($"{controller} {action} {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
                         foreach (var header in this.HttpContextAccessor.HttpContext.Request.Headers)
@@ -90,7 +91,7 @@ namespace FewBox.Core.Web.Security
                         {
                             this.Logger.LogDebug($"Claim: {claim.Type}-{claim.Value}");
                         }
-                    }
+                    }*/
                 }
             }
             else
