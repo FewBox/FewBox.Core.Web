@@ -69,6 +69,7 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
+                    throw new System.Exception($"[FewBox EX] {service} {controller} {action} {verb} {token}");
                     this.Logger.LogError($"[FewBox JWTPayload] {service} {controller} {action} {verb} {token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
