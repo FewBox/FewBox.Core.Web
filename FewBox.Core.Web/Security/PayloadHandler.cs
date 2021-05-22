@@ -55,12 +55,12 @@ namespace FewBox.Core.Web.Security
                         }
                         else
                         {
-                            this.Logger.LogError("User Apis is null!");
+                            this.Logger.LogWarning("[FewBox JWTPayload] User Apis is null!");
                         }
                     }
                     else
                     {
-                        this.Logger.LogError("PayloadRequirement is null!");
+                        this.Logger.LogWarning("[FewBox JWTPayload] PayloadRequirement is null!");
                     }
                 }
                 if (doesUserHavePermission)
@@ -69,8 +69,7 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
-                    throw new System.Exception($"[FewBox EX] {service} {controller} {action} {verb} {token}");
-                    this.Logger.LogError($"[FewBox JWTPayload] {service} {controller} {action} {verb} {token}");
+                    this.Logger.LogWarning($"[FewBox JWTPayload] {service} {controller} {action} {verb} {token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
                     /*using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
@@ -90,7 +89,7 @@ namespace FewBox.Core.Web.Security
             else
             {
                 context.Fail();
-                this.Logger.LogWarning($"[FewBox] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                this.Logger.LogWarning($"[FewBox JWTPayload] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }

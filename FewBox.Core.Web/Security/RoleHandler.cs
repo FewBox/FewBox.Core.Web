@@ -66,7 +66,7 @@ namespace FewBox.Core.Web.Security
                     }
                     else
                     {
-                        this.Logger.LogError("RoleRequirement is null!");
+                        this.Logger.LogWarning("[FewBox JWTRole] RoleRequirement is null!");
                     }
                 }
                 if (doesUserHavePermission)
@@ -75,7 +75,7 @@ namespace FewBox.Core.Web.Security
                 }
                 else
                 {
-                    this.Logger.LogError($"[FewBox JWTPayload] {service} {controller} {action} {verb} {token}");
+                    this.Logger.LogWarning($"[FewBox JWTRole] {service} {controller} {action} {verb} {token}");
                     this.HttpContextAccessor.HttpContext.Response.StatusCode = 403;
                     context.Fail();
                     /*using (this.Logger.BeginScope($"[FewBox] Controller: {controller} Action: {action} Method: {verb}"))
@@ -95,7 +95,7 @@ namespace FewBox.Core.Web.Security
             else
             {
                 context.Fail();
-                this.Logger.LogWarning($"[FewBox] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
+                this.Logger.LogWarning($"[FewBox JWTRole] Token Invalid {this.HttpContextAccessor.HttpContext.Request.GetDisplayUrl()}###{verb}###{authorization}");
             }
             return Task.CompletedTask;
         }

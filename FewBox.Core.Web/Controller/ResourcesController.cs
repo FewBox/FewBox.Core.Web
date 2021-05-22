@@ -348,21 +348,13 @@ namespace FewBox.Core.Web.Controller
         [Transaction]
         public virtual PayloadResponseDto<int> PutOwner(Guid id, [FromBody] PD persistenceDto)
         {
-            int effect = -1;
-            if (this.VerifyOwner(id))
+            return this.VerifyOwner(id,
+            () =>
             {
                 E entity = this.Mapper.Map<PD, E>(persistenceDto);
                 entity.Id = id;
-                effect = this.Repository.Update(entity);
-            }
-            else
-            {
-                this.HttpContext.Response.StatusCode = 403;
-            }
-            return new PayloadResponseDto<int>
-            {
-                Payload = effect
-            };
+                return this.Repository.Update(entity);
+            });
         }
 
         /// <summary>
@@ -381,21 +373,13 @@ namespace FewBox.Core.Web.Controller
                 { "op": "replace", "path": "/Name", "value": "FewBox & Landpy" },
             ]
             */
-            int effect = -1;
-            if (this.VerifyOwner(id))
+            return this.VerifyOwner(id,
+            () =>
             {
                 E theEntity = this.Repository.FindOne(id);
                 jsonPatchDocument.ApplyTo(theEntity);
-                effect = this.Repository.Update(theEntity);
-            }
-            else
-            {
-                this.HttpContext.Response.StatusCode = 403;
-            }
-            return new PayloadResponseDto<int>
-            {
-                Payload = effect
-            };
+                return this.Repository.Update(theEntity);
+            });
         }
 
         /// <summary>
@@ -407,36 +391,48 @@ namespace FewBox.Core.Web.Controller
         [Transaction]
         public virtual PayloadResponseDto<int> DeleteOwner(Guid id)
         {
-            int effect = -1;
-            if (this.VerifyOwner(id))
+            return this.VerifyOwner(id,
+            () =>
             {
-                effect = this.Repository.Recycle(id);
-            }
-            else
+                return this.Repository.Recycle(id);
+            });
+        }
+
+        protected PayloadResponseDto<int> VerifyOwner(Guid resourceId, Func<int> successFunc)
+        {
+            var payloadResponseDto = new PayloadResponseDto<int>();
+            this.VerifyOwner(this.Repository, resourceId,
+            () =>
+            {
+                payloadResponseDto.Payload = successFunc();
+            },
+            () =>
             {
                 this.HttpContext.Response.StatusCode = 403;
-            }
-            return new PayloadResponseDto<int>
-            {
-                Payload = effect
-            };
+                payloadResponseDto.IsSuccessful = false;
+                payloadResponseDto.ErrorCode = "OWNER_403";
+                payloadResponseDto.ErrorMessage = "The owner is different!";
+            });
+            return payloadResponseDto;
         }
 
-        protected bool VerifyOwner(Guid resourceId)
-        {
-            return this.VerifyOwner(this.Repository, resourceId);
-        }
-
-        protected bool VerifyOwner(RI repository, Guid resourceId)
+        protected void VerifyOwner(RI repository, Guid resourceId, Action successAction, Action failedAction)
         {
             var resource = repository.FindOne(resourceId);
             if (resource != null)
             {
-                return this.GetUserId() == resource.CreatedBy;
+                if (this.GetUserId() == resource.CreatedBy)
+                {
+                    successAction();
+                }
+                else
+                {
+                    failedAction();
+                }
             }
             else
             {
-                return false;
+                failedAction();
             }
         }
     }
