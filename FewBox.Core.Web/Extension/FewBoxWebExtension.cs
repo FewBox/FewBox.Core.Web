@@ -48,7 +48,7 @@ namespace FewBox.Core.Web.Extension
             Configuration = configuration;
         }
 
-        public static void AddFewBox(this IServiceCollection services, IList<ApiVersionDocument> apiVersionDocuments, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, int responseCacheDuration = 3600)
+        public static void AddFewBox(this IServiceCollection services, IList<ApiVersionDocument> apiVersionDocuments, FewBoxDBType fewBoxDBType = FewBoxDBType.MySQL, FewBoxAuthType fewBoxAuthType = FewBoxAuthType.Payload, FewBoxCacheType fewBoxCacheType = FewBoxCacheType.None, int responseCacheDuration = 3600)
         {
             // Support Json Patch
             // services.AddControllersWithViews().AddNewtonsoftJson();
@@ -140,10 +140,13 @@ namespace FewBox.Core.Web.Extension
             services.AddRouting(options => options.LowercaseUrls = true); // Lowercase the urls.
             services.AddMvc(options =>
             {
-                options.CacheProfiles.Add("default", new Microsoft.AspNetCore.Mvc.CacheProfile
+                if (fewBoxCacheType.HasFlag(FewBoxCacheType.Memory))
                 {
-                    Duration = responseCacheDuration // One hour. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
-                });
+                    options.CacheProfiles.Add("default", new Microsoft.AspNetCore.Mvc.CacheProfile
+                    {
+                        Duration = responseCacheDuration // One hour. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
+                    });
+                }
                 options.Filters.Add<TransactionAsyncFilter>(); // Add DB transaction.
                 options.Filters.Add<TraceAsyncFilter>(); // Add biz trace log.
             })
@@ -183,7 +186,19 @@ namespace FewBox.Core.Web.Extension
                 });
             services.AddSingleton<IAuthorizationPolicyProvider, FewBoxAuthorizationPolicyProvider>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Auto Mapper.
-            services.AddMemoryCache(); // Memory cache.
+            // Used for Cache 1. IDistributedCache 2. [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new[] { "datetime" })]
+            if (fewBoxCacheType.HasFlag(FewBoxCacheType.Redis))
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = fewBoxConfig.RedisDistributedCache.Configuration;
+                    options.InstanceName = fewBoxConfig.RedisDistributedCache.InstanceName;
+                });
+            }
+            if (fewBoxCacheType.HasFlag(FewBoxCacheType.Memory))
+            {
+                services.AddMemoryCache(); // Memory cache.
+            }
             services.AddScoped<ICurrentUser<Guid>, CurrentUser<Guid>>();
             // Used for IHttpContextAccessor&IActionContextAccessor context.
             services.AddHttpContextAccessor();

@@ -4,7 +4,6 @@ namespace FewBox.Core.Web.Config
     {
         public HealthyConfig Healthy { get; set; }
         public JWTConfig JWT { get; set; }
-        public NotificationConfig Notification { get; set; }
         public OrmConfig Orm { get; set; }
         public RedisDistributedCacheConfig RedisDistributedCache { get; set; }
         public SecurityEndpointConfig SecurityEndpoint { get; set; }
