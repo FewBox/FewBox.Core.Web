@@ -22,23 +22,53 @@ namespace FewBox.Core.Web.Controller
             this.TokenService = tokenService;
         }
 
-        protected Guid GetUserId()
+        protected UserProfile GetUserProfile()
         {
-            Guid userId = Guid.Empty;
+            UserProfile userProfile = null;
             if (this.TokenService != null)
             {
                 string authorization = this.HttpContext.Request.Headers["Authorization"];
                 string token = String.IsNullOrEmpty(authorization) ? null : authorization.Replace("Bearer ", String.Empty, StringComparison.OrdinalIgnoreCase);
                 if (token != null)
                 {
-                    Guid.TryParse(this.TokenService.GetUserIdByToken(token), out userId);
+                    userProfile = this.TokenService.GetUserProfileByToken(token);
                 }
             }
             else
             {
                 throw new Exception("FewBox: Please init TokenService!");
             }
+            return userProfile;
+        }
+
+        protected Guid GetUserId()
+        {
+            Guid userId;
+            var userProfile = this.GetUserProfile();
+            if (userProfile == null)
+            {
+                userId = Guid.Empty;
+            }
+            else
+            {
+                Guid.TryParse(userProfile.Id, out userId);
+            }
             return userId;
+        }
+
+        protected string GetUserTenant()
+        {
+            string userTenant;
+            var userProfile = this.GetUserProfile();
+            if (userProfile == null)
+            {
+                userTenant = String.Empty;
+            }
+            else
+            {
+                userTenant = userProfile.Tenant;
+            }
+            return userTenant;
         }
     }
 }
